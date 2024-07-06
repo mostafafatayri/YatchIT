@@ -1,0 +1,44 @@
+.care-value {
+    position: relative;
+    height: 400px; /* Adjust height as needed */
+    background-image: url('https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Fbanner%2F2.jpg&w=3840&q=100'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+  
+    .content {
+      background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+      padding: 20px 40px;
+      border-radius: 10px;
+  
+      h2 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+  
+      p {
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+  
+      button {
+        background-color: white;
+        color: black;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+  
+        &:hover {
+          background-color: #ddd;
+        }
+      }
+    }
+  }
+  

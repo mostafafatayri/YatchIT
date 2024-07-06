@@ -1,0 +1,51 @@
+/* Reset some basic styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Navbar styles */
+  .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    background: rgba(255, 255, 255, 0.5); /* Initial background color with transparency */
+    box-shadow: none;
+    z-index: 1000;
+  
+    &.scrolled {
+      background-color: #fff; /* Background color when scrolled */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+  
+    .nav-links {
+      list-style: none;
+      display: flex;
+  
+      li {
+        margin-left: 20px;
+  
+        a {
+          text-decoration: none;
+          color: #000;
+          font-weight: bold;
+  
+          &:hover {
+            color: #007BFF;
+          }
+        }
+      }
+    }
+  }
+  
