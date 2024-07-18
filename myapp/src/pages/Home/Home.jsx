@@ -8,16 +8,20 @@ import TopDestinations from '../../components/TopDestinations/top.jsx';
 import ReasonsToRent from '../../components/Reasons/ReasonsToRent.jsx';
 import CareValue from '../../components/Care/Care.jsx';
 import TopBoatRentals from '../../components/TopRent/Toprent.jsx';
+//import { Email } from '@material-ui/icons';
+import EmailCollector from '../../components/Email/Email.jsx';
+import Ending from '../../components/Ending/End.jsx';
 
 const Home = () => {
   return (
     <div>
-      <Navbar />
+    
       <Hero />
       <TopDestinations/>
       <TopBoatRentals/>
       <ReasonsToRent/>
-      <CareValue/>
+      
+      <Ending/>
       
       <div>
    

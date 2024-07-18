@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './Navbar.scss';
+import { Link } from 'react-router-dom';
+import { Style } from '@material-ui/icons';
+import { colors } from '@material-ui/core';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -23,13 +26,23 @@ const Navbar = () => {
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-      <div className="logo">TripFinder.</div>
+
+      <Link to='/'>
+      <div className="logo" >YatchNET.</div>
+      </Link>
       <ul className="nav-links">
         <li><a href="#home">Home</a></li>
+        <Link to='/explore'>
         <li><a href="#explore">Explore</a></li>
+        </Link>
         <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#help">Help</a></li>
-        <li><a href="#other-pages">Other Pages</a></li>
+        
+        <Link to="/myaccount">
+        <li><a href="#help">account</a></li>
+        </Link>
+        <Link to='/login'>
+        <li><a href="#other-pages">Login</a></li>
+        </Link>
       </ul>
     </nav>
   );

@@ -1,0 +1,59 @@
+.email-collector {
+    position: relative;
+    height: 300px; /* Adjust height as needed */
+    background-image: url('https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Fbanner%2F2.jpg&w=3840&q=100'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    margin-top: 50px;
+  
+    .content {
+      background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+      padding: 20px 40px;
+      border-radius: 10px;
+  
+      h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+  
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+  
+      form {
+        display: flex;
+        align-items: center;
+  
+        input {
+          padding: 10px;
+          border: none;
+          border-radius: 5px 0 0 5px;
+          outline: none;
+          font-size: 16px;
+          flex: 1;
+        }
+  
+        button {
+          padding: 10px 20px;
+          background-color: white;
+          color: black;
+          border: none;
+          border-radius: 0 5px 5px 0;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: bold;
+  
+          &:hover {
+            background-color: #ddd;
+          }
+        }
+      }
+    }
+  }
+  

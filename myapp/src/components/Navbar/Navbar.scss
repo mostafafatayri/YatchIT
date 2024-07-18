@@ -25,6 +25,7 @@
     }
   
     .logo {
+      color: #007BFF;
       font-size: 24px;
       font-weight: bold;
     }
@@ -47,5 +48,15 @@
         }
       }
     }
+  }
+  
+//can be removed 
+
+  .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; // Ensure it's on top of other elements
+    background-color: #fff; // Set background color to cover content behind it
   }
   

@@ -1,0 +1,51 @@
+.add-type-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height for centering */
+  
+    .content {
+      text-align: center;
+  
+      h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+  
+      p {
+        font-size: 16px;
+        margin-bottom: 20px;
+      }
+  
+      .options {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+  
+        .option {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: background 0.3s;
+  
+          &:hover {
+            background: #f9f9f9;
+          }
+  
+          .icon {
+            font-size: 24px;
+            margin-right: 10px;
+          }
+  
+          span {
+            font-size: 18px;
+          }
+        }
+      }
+    }
+  }
+  

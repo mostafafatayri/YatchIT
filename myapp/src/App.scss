@@ -4,3 +4,43 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Reset link styles globally */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #4B0082; /* Example color, adjust as needed */
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #fff; /* Adjust background color as needed */
+
+  .nav-links {
+    display: flex;
+    list-style: none;
+
+    li {
+      margin: 0 15px;
+
+      a {
+        color: #000; /* Adjust link color as needed */
+        font-size: 16px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #007BFF; /* Adjust hover color as needed */
+        }
+      }
+    }
+  }
+}
