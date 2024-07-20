@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaCopy, FaPlusCircle } from 'react-icons/fa';
 import './AddType.scss';
+import { Link } from '@material-ui/core';
 
 const AddType = () => {
   return (
@@ -10,10 +11,14 @@ const AddType = () => {
         <p>Start a new listing</p>
         <div className="options">
             
+       
           <div className="option">
             <FaPlusCircle className="icon" />
+            
             <span>Create a new listing</span>
+           
           </div>
+         
           <div className="option">
             <FaCopy className="icon" />
             <span>Creat booking </span>

@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import './AddBoat.scss';
 import { useDropzone } from 'react-dropzone';
+import newRequest from '../../utils/newRequest';
+import { boatReducer, INITIAL_STATE } from '../../reducers/YachtReducer.js';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import upload from '../../utils/upload';
 
 const AddBoat = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [files, setFiles] = useState([]);
+  const [state, dispatch] = useReducer(boatReducer, INITIAL_STATE);
+  const [uploading, setUploading] = useState(false);
 
   const handleNext = () => {
     setCurrentStep(prevStep => prevStep + 1);
@@ -15,9 +20,10 @@ const AddBoat = () => {
   };
 
   const onDrop = acceptedFiles => {
-    setFiles(acceptedFiles.map(file => Object.assign(file, {
+    const filesWithPreview = acceptedFiles.map(file => Object.assign(file, {
       preview: URL.createObjectURL(file)
-    })));
+    }));
+    dispatch({ type: 'ADD_FILES', payload: filesWithPreview });
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -25,6 +31,85 @@ const AddBoat = () => {
     accept: 'image/*',
     multiple: true
   });
+
+  const handleRemove = (file) => {
+    dispatch({ type: 'REMOVE_FILE', payload: file });
+  };
+
+  const toggleEquipment = (item) => {
+    dispatch({ type: 'TOGGLE_EQUIPMENT', payload: item });
+  };
+
+  const handleUpload = async () => {
+    setUploading(true);
+    try {
+      const images = await Promise.all(
+        state.files.map(async (file) => {
+          const url = await upload(file);
+          return url;
+        })
+      );
+      setUploading(false);
+      dispatch({ type: "ADD_IMAGES", payload: images });
+      return images;
+    } catch (err) {
+      console.log(err);
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const uploadedImages = await handleUpload();
+    const boatData = {
+      ...state,
+      files: uploadedImages
+    };
+    mutation.mutate(boatData);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'price' || name === 'hours') {
+      const numericValue = value === '' ? '' : Math.max(0, Math.min(Number(value), name === 'hours' ? 23 : Infinity));
+      dispatch({ type: 'CHANGE_INPUT', payload: { name, value: numericValue } });
+    } else {
+      dispatch({ type: 'CHANGE_INPUT', payload: { name, value } });
+    }
+  };
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (boatData) => {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      console.log('Sending boatData:', boatData);
+
+      return newRequest.post('/yatch/actions/addYatch', boatData, { headers });
+      
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["boats"]);
+    },
+  });
+
+  const equipmentImages = {
+    'Outboard Motor': '/img/motor.png',
+    'Hot Water': '/img/water.png',
+    'Automatic Pilot': '/img/yacht.png',
+    'Deck Shower': '/img/shower.png',
+    'GPS': '/img/gps.png',
+    'Cockpit Table': '/img/table.png',
+    'Wi Fi': '/img/wifi.png',
+    'TV': '/img/tv.png',
+    'Fire Detector': '/img/detector.png',
+    'Speakers': '/img/speakers.png',
+    'Boarding Ladder': '/img/ladder.png',
+    'First Aid Kit': '/img/aid.png',
+  };
 
   return (
     <div className="add-type-page">
@@ -35,30 +120,29 @@ const AddBoat = () => {
             <form>
               <div className="input-group">
                 <label>Now, lets give your boat a title</label>
-                <input type="text" placeholder="Title" maxLength="24" />
-                <small>0/24</small>
+                <input
+                  type="text"
+                  placeholder="Title"
+                  maxLength="24"
+                  name="title"
+                  value={state.title}
+                  onChange={handleInputChange}
+                />
+                <small>{state.title.length}/24</small>
               </div>
               <div className="input-group">
                 <label>What type of boat will you have?</label>
                 <div className="boat-types">
-                  <button type="button">
-                    <img src="/img/motor-boat.png" alt="Motor Boat" /> Motor Boat
-                  </button>
-                  <button type="button">
-                    <img src="/img/sail-boat.png" alt="Sailboat" /> Sailboat
-                  </button>
-                  <button type="button">
-                    <img src="/img/jetski.png" alt="Jet Ski" /> Jet Ski
-                  </button>
-                  <button type="button">
-                    <img src="/img/yatch.png" alt="Yacht" /> Yacht
-                  </button>
-                  <button type="button">
-                    <img src="/img/dinghy.png" alt="Dinghy" /> Dinghy
-                  </button>
-                  <button type="button">
-                    <img src="/img/catamaran.png" alt="Catamaran" /> Catamaran
-                  </button>
+                  {['Motor Boat', 'Sailboat', 'JetSki', 'Yacht', 'Dinghy', 'Catamaran'].map(type => (
+                    <button
+                      type="button"
+                      key={type}
+                      className={state.boatType === type ? 'selected' : ''}
+                      onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'boatType', value: type } })}
+                    >
+                      <img src={`/img/${type.toLowerCase().replace(' ', '-')}.png`} alt={type} /> {type}
+                    </button>
+                  ))}
                 </div>
               </div>
             </form>
@@ -70,8 +154,35 @@ const AddBoat = () => {
             <form>
               <div className="input-group">
                 <label>Set your price</label>
-                <input type="number" placeholder="$10" />
+                <input
+                  type="number"
+                  placeholder="$10"
+                  name="price"
+                  value={state.price}
+                  onChange={handleInputChange}
+                />
               </div>
+              <div className="input-group">
+                <label>Is this price per day or per hour?</label>
+                <select
+                  name="priceType"
+                  value={state.priceType}
+                  onChange={handleInputChange}
+                >
+                  <option value="per day">Per Day</option>
+                  <option value="per hour">Per Hour</option>
+                </select>
+              </div>
+              {state.priceType === 'per hour' && (
+                <div className="input-group">
+                  <label>Number of hours</label>
+                  <div className="counter">
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'hours', value: Math.max(1, state.hours - 1) } })}>-</button>
+                    <input type="number" name="hours" value={state.hours} onChange={handleInputChange} />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'hours', value: Math.min(23, state.hours + 1) } })}>+</button>
+                  </div>
+                </div>
+              )}
             </form>
           </div>
         )}
@@ -81,8 +192,14 @@ const AddBoat = () => {
             <form>
               <div className="input-group">
                 <label>Create your description</label>
-                <textarea placeholder="Description" maxLength="450"></textarea>
-                <small>0/450</small>
+                <textarea
+                  placeholder="Description"
+                  maxLength="450"
+                  name="description"
+                  value={state.description}
+                  onChange={handleInputChange}
+                ></textarea>
+                <small>{state.description.length}/450</small>
               </div>
             </form>
           </div>
@@ -95,21 +212,27 @@ const AddBoat = () => {
                 <label>Basic info</label>
                 <div className="counter">
                   <label>Bedrooms</label>
-                  <button>-</button>
-                  <input type="text" value="00" readOnly />
-                  <button>+</button>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bedrooms', value: Math.max(0, state.bedrooms - 1) } })}>-</button>
+                    <input type="text" value={state.bedrooms} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bedrooms', value: state.bedrooms + 1 } })}>+</button>
+                  </div>
                 </div>
                 <div className="counter">
                   <label>Bathrooms</label>
-                  <button>-</button>
-                  <input type="text" value="00" readOnly />
-                  <button>+</button>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bathrooms', value: Math.max(0, state.bathrooms - 1) } })}>-</button>
+                    <input type="text" value={state.bathrooms} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bathrooms', value: state.bathrooms + 1 } })}>+</button>
+                  </div>
                 </div>
                 <div className="counter">
                   <label>Guests</label>
-                  <button>-</button>
-                  <input type="text" value="01" readOnly />
-                  <button>+</button>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'guests', value: Math.max(1, state.guests - 1) } })}>-</button>
+                    <input type="text" value={state.guests} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'guests', value: state.guests + 1 } })}>+</button>
+                  </div>
                 </div>
               </div>
             </form>
@@ -123,116 +246,125 @@ const AddBoat = () => {
               <p>Drag your photos here or click to select files</p>
             </div>
             <div className="photos-preview">
-              {files.map(file => (
+              {state.files.map(file => (
                 <div key={file.name} className="photo-preview">
                   <img src={file.preview} alt="preview" />
+                  <button className="remove-button" onClick={() => handleRemove(file)}>X</button>
                 </div>
               ))}
             </div>
           </div>
         )}
         {currentStep === 6 && (
-          <div className="steps step-633">
-          <h2>Step 6: Boat Specifications</h2>
-          <form>
-            <div className="input-group">
-              <label>Engine</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
-            </div>
-            <div className="input-group">
-              <label>Engine Torque</label>
-              <input type="text" placeholder="111 ft-lb" />
-            </div>
-            <div className="input-group">
-              <label>Fuel System</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
-            </div>
-            <div className="input-group">
-              <label>Bore x Stroke</label>
-              <input type="text" placeholder="111 ft-lb" />
-            </div>
-           
-           
-          <div className="input-group">
-              <label>Luggage Capacity + Volume</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
-            </div>
-
-            <div className="input-group">
-              <label>Weight</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
-            </div>
-
-
-
-            <div className="input-group">
-              <label>Fuel Capacity</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
-            </div>
-
-      
-            
-
-          </form>
-        </div>
+          <div className="step step-6">
+            <h2>Step 6: Boat Specifications</h2>
+            <form>
+              <div className="input-group">
+                <label>Engine</label>
+                <input
+                  type="text"
+                  placeholder="Milwaukee-Eight 107"
+                  name="engine"
+                  value={state.engine}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Engine Torque</label>
+                <input
+                  type="text"
+                  placeholder="111 ft-lb"
+                  name="torque"
+                  value={state.torque}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel System</label>
+                <input
+                  type="text"
+                  placeholder="Electronic Sequential Port Fuel Injection (ESPFI)"
+                  name="fuelSystem"
+                  value={state.fuelSystem}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Bore x Stroke</label>
+                <input
+                  type="text"
+                  placeholder="3.937 in. x 4.375 in."
+                  name="boreStroke"
+                  value={state.boreStroke}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel Capacity</label>
+                <input
+                  type="text"
+                  placeholder="6.00 gal (22.71 L)"
+                  name="fuelCap"
+                  value={state.fuelCap}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Luggage Capacity - Volume</label>
+                <input
+                  type="text"
+                  placeholder="4.7 cu ft"
+                  name="capacity"
+                  value={state.capacity}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel Economy</label>
+                <input
+                  type="text"
+                  placeholder="43 mpg"
+                  name="fuelEconomy"
+                  value={state.fuelEconomy}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Weight</label>
+                <input
+                  type="text"
+                  placeholder="As Shipped: 877.00 lb.; Running Order: 904 lb."
+                  name="weight"
+                  value={state.weight}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </form>
+          </div>
         )}
         {currentStep === 7 && (
           <div className="step step-7">
             <h2>Step 7: On Board Equipment</h2>
             <div className="equipment-options">
-              <div className="equipment-option">
-                <img src="/img/motor.png" alt="Outboard Motor" />
-                <label>Outboard Motor</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/water.png" alt="Hot Water" />
-                <label>Hot Water</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/yacht.png" alt="Automatic Pilot" />
-                <label>Automatic Pilot</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/shower.png" alt="Hot Water" />
-                <label>Deck Shower</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/gps.png" alt="GPS" />
-                <label>GPS</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/table.png" alt="Cockpit Table" />
-                <label>Cockpit Table</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/wifi.png" alt="Wi Fi" />
-                <label>Wi Fi</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/tv.png" alt="TV" />
-                <label>TV</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/detector.png" alt="Fire Detector" />
-                <label>Fire Detector</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/speakers.png" alt="Speakers" />
-                <label>Speakers</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/ladder.png" alt="Boarding Ladder" />
-                <label>Boarding Ladder</label>
-              </div>
-              <div className="equipment-option">
-                <img src="/img/aid.png" alt="First Aid Kit" />
-                <label>First Aid Kit</label>
-              </div>
+              {Object.keys(equipmentImages).map(item => (
+                <div
+                  key={item}
+                  className={`equipment-option ${state.equipment.includes(item) ? 'selected' : ''}`}
+                  onClick={() => toggleEquipment(item)}
+                >
+                  <img src={equipmentImages[item]} alt={item} />
+                  <label>{item}</label>
+                </div>
+              ))}
+            </div>
+            <div className="navigation-buttons">
+              <button onClick={handleBack}>Back</button>
+              <button onClick={handleSubmit}>Upload</button>
             </div>
           </div>
         )}
         <div className="navigation-buttons">
-          {currentStep > 1 && <button onClick={handleBack}>Back</button>}
+          {currentStep > 1 && currentStep < 7 && <button onClick={handleBack}>Back</button>}
           {currentStep < 7 && <button onClick={handleNext}>Next</button>}
         </div>
       </div>
@@ -241,15 +373,356 @@ const AddBoat = () => {
 };
 
 export default AddBoat;
-/**
- * //
 
-        
-            <div className="input-group">
-              <label>Fuel Capacity</label>
-              <input type="text" placeholder="Milwaukee-Eight 107" />
+
+/*
+import React, { useReducer, useState } from 'react';
+import './AddBoat.scss';
+import { useDropzone } from 'react-dropzone';
+import newRequest from '../../utils/newRequest';
+import { boatReducer, INITIAL_STATE } from '../../reducers/YachtReducer.js';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import upload from '../../utils/upload';
+
+const AddBoat = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [state, dispatch] = useReducer(boatReducer, INITIAL_STATE);
+  const [uploading, setUploading] = useState(false);
+
+  const handleNext = () => {
+    setCurrentStep(prevStep => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setCurrentStep(prevStep => prevStep - 1);
+  };
+
+  const onDrop = acceptedFiles => {
+    const filesWithPreview = acceptedFiles.map(file => Object.assign(file, {
+      preview: URL.createObjectURL(file)
+    }));
+    dispatch({ type: 'ADD_FILES', payload: filesWithPreview });
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: 'image/*',
+    multiple: true
+  });
+
+  const handleRemove = (file) => {
+    dispatch({ type: 'REMOVE_FILE', payload: file });
+  };
+
+  const toggleEquipment = (item) => {
+    dispatch({ type: 'TOGGLE_EQUIPMENT', payload: item });
+  };
+
+  const handleUpload = async () => {
+    setUploading(true);
+    try {
+      const images = await Promise.all(
+        state.files.map(async (file) => {
+          const url = await upload(file);
+          return url;
+        })
+      );
+      setUploading(false);
+      dispatch({ type: "ADD_IMAGES", payload: images });
+      return images;
+    } catch (err) {
+      console.log(err);
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const uploadedImages = await handleUpload();
+    const boatData = {
+      ...state,
+      files: uploadedImages
+    };
+    mutation.mutate(boatData);
+  };
+
+  const handleInputChange = (e) => {
+    dispatch({ type: 'CHANGE_INPUT', payload: { name: e.target.name, value: e.target.value } });
+  };
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (boatData) => {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      console.log('Sending boatData:', boatData);
+
+      return newRequest.post('/yatch/actions/addYatch', boatData, { headers });
+      
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["boats"]);
+    },
+  });
+
+  const equipmentImages = {
+    'Outboard Motor': '/img/motor.png',
+    'Hot Water': '/img/water.png',
+    'Automatic Pilot': '/img/yacht.png',
+    'Deck Shower': '/img/shower.png',
+    'GPS': '/img/gps.png',
+    'Cockpit Table': '/img/table.png',
+    'Wi Fi': '/img/wifi.png',
+    'TV': '/img/tv.png',
+    'Fire Detector': '/img/detector.png',
+    'Speakers': '/img/speakers.png',
+    'Boarding Ladder': '/img/ladder.png',
+    'First Aid Kit': '/img/aid.png',
+  };
+
+  return (
+    <div className="add-type-page">
+      <div className="form-container">
+        {currentStep === 1 && (
+          <div className="step step-1">
+            <h2>Step 1: Title and Type</h2>
+            <form>
+              <div className="input-group">
+                <label>Now, lets give your boat a title</label>
+                <input
+                  type="text"
+                  placeholder="Title"
+                  maxLength="24"
+                  name="title"
+                  value={state.title}
+                  onChange={handleInputChange}
+                />
+                <small>{state.title.length}/24</small>
+              </div>
+              <div className="input-group">
+                <label>What type of boat will you have?</label>
+                <div className="boat-types">
+                  {['Motor Boat', 'Sailboat', 'JetSki', 'Yacht', 'Dinghy', 'Catamaran'].map(type => (
+                    <button
+                      type="button"
+                      key={type}
+                      className={state.boatType === type ? 'selected' : ''}
+                      onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'boatType', value: type } })}
+                    >
+                      <img src={`/img/${type.toLowerCase().replace(' ', '-')}.png`} alt={type} /> {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
+        {currentStep === 2 && (
+          <div className="step step-2">
+            <h2>Step 2: Set your price</h2>
+            <form>
+              <div className="input-group">
+                <label>Set your price</label>
+                <input
+                  type="number"
+                  placeholder="$10"
+                  name="price"
+                  value={state.price}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </form>
+          </div>
+        )}
+        {currentStep === 3 && (
+          <div className="step step-3">
+            <h2>Step 3: Create your description</h2>
+            <form>
+              <div className="input-group">
+                <label>Create your description</label>
+                <textarea
+                  placeholder="Description"
+                  maxLength="450"
+                  name="description"
+                  value={state.description}
+                  onChange={handleInputChange}
+                ></textarea>
+                <small>{state.description.length}/450</small>
+              </div>
+            </form>
+          </div>
+        )}
+        {currentStep === 4 && (
+          <div className="step step-4">
+            <h2>Step 4: Share some basic info about your boat</h2>
+            <form>
+              <div className="input-group">
+                <label>Basic info</label>
+                <div className="counter">
+                  <label>Bedrooms</label>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bedrooms', value: Math.max(0, state.bedrooms - 1) } })}>-</button>
+                    <input type="text" value={state.bedrooms} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bedrooms', value: state.bedrooms + 1 } })}>+</button>
+                  </div>
+                </div>
+                <div className="counter">
+                  <label>Bathrooms</label>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bathrooms', value: Math.max(0, state.bathrooms - 1) } })}>-</button>
+                    <input type="text" value={state.bathrooms} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'bathrooms', value: state.bathrooms + 1 } })}>+</button>
+                  </div>
+                </div>
+                <div className="counter">
+                  <label>Guests</label>
+                  <div>
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'guests', value: Math.max(1, state.guests - 1) } })}>-</button>
+                    <input type="text" value={state.guests} readOnly />
+                    <button type="button" onClick={() => dispatch({ type: 'CHANGE_INPUT', payload: { name: 'guests', value: state.guests + 1 } })}>+</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
+        {currentStep === 5 && (
+          <div className="step step-5">
+            <h2>Step 5: Add Photos</h2>
+            <div {...getRootProps({ className: 'dropzone' })}>
+              <input {...getInputProps()} />
+              <p>Drag your photos here or click to select files</p>
             </div>
-           
-         
-//
+            <div className="photos-preview">
+              {state.files.map(file => (
+                <div key={file.name} className="photo-preview">
+                  <img src={file.preview} alt="preview" />
+                  <button className="remove-button" onClick={() => handleRemove(file)}>X</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {currentStep === 6 && (
+          <div className="step step-6">
+            <h2>Step 6: Boat Specifications</h2>
+            <form>
+              <div className="input-group">
+                <label>Engine</label>
+                <input
+                  type="text"
+                  placeholder="Milwaukee-Eight 107"
+                  name="engine"
+                  value={state.engine}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Engine Torque</label>
+                <input
+                  type="text"
+                  placeholder="111 ft-lb"
+                  name="torque"
+                  value={state.torque}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel System</label>
+                <input
+                  type="text"
+                  placeholder="Electronic Sequential Port Fuel Injection (ESPFI)"
+                  name="fuelSystem"
+                  value={state.fuelSystem}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Bore x Stroke</label>
+                <input
+                  type="text"
+                  placeholder="3.937 in. x 4.375 in."
+                  name="boreStroke"
+                  value={state.boreStroke}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel Capacity</label>
+                <input
+                  type="text"
+                  placeholder="6.00 gal (22.71 L)"
+                  name="fuelCap"
+                  value={state.fuelCap}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Luggage Capacity - Volume</label>
+                <input
+                  type="text"
+                  placeholder="4.7 cu ft"
+                  name="capacity"
+                  value={state.capacity}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Fuel Economy</label>
+                <input
+                  type="text"
+                  placeholder="43 mpg"
+                  name="fuelEconomy"
+                  value={state.fuelEconomy}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="input-group">
+                <label>Weight</label>
+                <input
+                  type="text"
+                  placeholder="As Shipped: 877.00 lb.; Running Order: 904 lb."
+                  name="weight"
+                  value={state.weight}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </form>
+          </div>
+        )}
+        {currentStep === 7 && (
+          <div className="step step-7">
+            <h2>Step 7: On Board Equipment</h2>
+            <div className="equipment-options">
+              {Object.keys(equipmentImages).map(item => (
+                <div
+                  key={item}
+                  className={`equipment-option ${state.equipment.includes(item) ? 'selected' : ''}`}
+                  onClick={() => toggleEquipment(item)}
+                >
+                  <img src={equipmentImages[item]} alt={item} />
+                  <label>{item}</label>
+                </div>
+              ))}
+            </div>
+            <div className="navigation-buttons">
+              <button onClick={handleBack}>Back</button>
+              <button onClick={handleSubmit}>Upload</button>
+            </div>
+          </div>
+        )}
+        <div className="navigation-buttons">
+          {currentStep > 1 && currentStep < 7 && <button onClick={handleBack}>Back</button>}
+          {currentStep < 7 && <button onClick={handleNext}>Next</button>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddBoat;
+
  */

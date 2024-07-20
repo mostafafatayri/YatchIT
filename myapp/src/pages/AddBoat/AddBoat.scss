@@ -13,7 +13,7 @@
       display: flex;
       flex-direction: column;
       margin-top: 20px; /* Add margin to separate steps */
-     
+
       h2 {
         margin-bottom: 20px;
         font-size: 24px;
@@ -73,7 +73,8 @@
             height: 50px;
           }
 
-          &:hover {
+          &:hover,
+          &.selected {
             background: #007bff;
             color: white;
           }
@@ -83,30 +84,40 @@
       .counter {
         display: flex;
         align-items: center;
+        margin-bottom: 10px;
 
-        button {
-          padding: 10px;
-          border: 1px solid #ccc;
-          background: #f4f4f4;
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          &:hover {
-            background: #007bff;
-            color: white;
-          }
+        label {
+          margin-right: 10px;
+          width: 80px; /* Adjust width to align labels */
         }
 
-        input {
-          width: 50px;
-          text-align: center;
-          border: 1px solid #ccc;
-          border-left: none;
-          border-right: none;
+        div {
+          display: flex;
+          align-items: center;
+
+          button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #f4f4f4;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 5px; /* Adjust margin to align buttons */
+
+            &:hover {
+              background: #007bff;
+              color: white;
+            }
+          }
+
+          input {
+            width: 50px;
+            text-align: center;
+            border: 1px solid #ccc;
+          }
         }
       }
     }
@@ -144,11 +155,28 @@
         border: 1px solid #ccc;
         border-radius: 10px;
         overflow: hidden;
-        
+        position: relative;
+
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+
+        .remove-button {
+          position: absolute;
+          top: 5px;
+          right: 5px;
+          background: red;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
         }
       }
     }
@@ -174,7 +202,8 @@
           margin-bottom: 5px;
         }
 
-        &:hover {
+        &:hover,
+        &.selected {
           background: #007bff;
           color: white;
         }

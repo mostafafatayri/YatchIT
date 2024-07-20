@@ -1,0 +1,121 @@
+.reviews {
+    margin-top: 20px;
+  
+    h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+  
+    .ratings-summary {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+  
+      h2 {
+        font-size: 48px;
+        margin-right: 10px;
+      }
+  
+      p {
+        margin: 0;
+      }
+  
+      .rating-breakdown {
+        flex: 1;
+        margin-left: 20px;
+  
+        .rating-bar {
+          display: flex;
+          align-items: center;
+          margin-bottom: 5px;
+  
+          span {
+            width: 60px;
+          }
+  
+          .bar {
+            flex: 1;
+            height: 10px;
+            background: #ddd;
+            margin: 0 10px;
+            border-radius: 5px;
+  
+            .filled {
+              height: 100%;
+              background: #007bff;
+              border-radius: 5px;
+            }
+          }
+        }
+      }
+    }
+  
+    .review-list {
+      .review {
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        background: #f9f9f9;
+  
+        .review-header {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+  
+          .reviewer-info {
+            display: flex;
+            align-items: center;
+  
+            img {
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              margin-right: 10px;
+            }
+  
+            h4 {
+              margin: 0;
+            }
+  
+            p {
+              margin: 0;
+              color: #666;
+            }
+          }
+  
+          .review-location {
+            text-align: right;
+  
+            span {
+              color: #ffbf00;
+            }
+  
+            p {
+              margin: 0;
+              color: #666;
+            }
+          }
+        }
+  
+        p {
+          margin: 0;
+          color: #333;
+        }
+      }
+    }
+  
+    .add-review-button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+  
+      &:hover {
+        background: #0056b3;
+      }
+    }
+  }
+  

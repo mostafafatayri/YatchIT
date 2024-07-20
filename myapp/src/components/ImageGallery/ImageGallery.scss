@@ -1,0 +1,19 @@
+.image-gallery {
+  .main-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .thumbnail-container {
+    display: flex;
+    justify-content: space-between;
+
+    .thumbnail {
+      width: 30%;
+      height: auto;
+      border-radius: 10px;
+    }
+  }
+}

@@ -7,7 +7,7 @@ import https from 'https';
 import Auth from "./router/Auth.router.js";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-
+import Yacht from "./router/Yacht.router.js"
 const app = express(); // Tell server type is express
 
 dotenv.config();
@@ -29,6 +29,7 @@ app.use(cookieParser());
 app.use(morgan('combined')); 
 
 app.use("/api/auth", Auth);
+app.use("/api/yatch",Yacht);
 
 // Read the SSL certificate and key files
 const privateKey = fs.readFileSync('server.key', 'utf8');

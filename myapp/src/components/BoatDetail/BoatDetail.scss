@@ -1,0 +1,80 @@
+.boat-details {
+  h2 {
+    margin-top: 0;
+  }
+
+  p {
+    margin: 5px 0;
+  }
+
+  h3 {
+    margin-top: 20px;
+  }
+
+  .equipment-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+
+    .equipment-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #f4f4f4;
+      cursor: pointer;
+
+      img {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 5px;
+      }
+
+      &:hover {
+        background: #007bff;
+        color: white;
+      }
+
+      label {
+        font-size: 14px;
+        color: #333;
+      }
+    }
+  }
+
+  .specifications {
+    margin-top: 20px;
+
+    .specification {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+
+      .label {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .value {
+        color: #666;
+      }
+    }
+  }
+
+  .react-calendar {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+    background: #fff;
+
+    .react-calendar__tile {
+      max-width: 100% !important;
+    }
+  }
+}

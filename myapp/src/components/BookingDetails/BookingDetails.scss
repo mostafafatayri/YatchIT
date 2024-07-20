@@ -1,0 +1,164 @@
+.booking-details {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+  max-width: 400px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  max-height: 470px;
+
+  h2, p, form, .price-details {
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 16px;
+    color: #666;
+  }
+
+  .date-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+
+    div {
+      flex: 1;
+
+      label {
+        display: block;
+        margin: 10px 0 5px;
+        font-size: 14px;
+        color: #333;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+    }
+  }
+
+  .guest-dropdown {
+    position: relative;
+
+    .guest-button {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .guest-options {
+      position: absolute;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      z-index: 10;
+      width: 100%;
+
+      .guest-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+
+        button {
+          width: 30px;
+          height: 30px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          background: #fff;
+          cursor: pointer;
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+          }
+        }
+
+        span {
+          width: 30px;
+          text-align: center;
+        }
+      }
+
+      .apply-button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: #000;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+
+        &:hover {
+          background: #333;
+        }
+      }
+    }
+  }
+
+  .price-details {
+    p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .discount {
+      color: red;
+    }
+
+    .total-fee {
+      font-weight: bold;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+  }
+
+  .reserve-button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: #000;
+    color: #fff;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+
+    &:hover {
+      background-color: #333;
+    }
+  }
+
+  .report-link {
+    display: block;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -301,28 +301,12 @@ function sendEmail(email,username, otp,userId,action) {
 // register of a user
 
 
-
-export const logout = async (req, res) => {
-    //const token = req.cookies.accessToken; /// check after come back 
-
-    const token = req.headers.authorization
-    console.log("\nthe access token is : "+token);
-    res
-      .clearCookie("accessToken", {
-        sameSite: "none",
-        secure: true,
-      })
-      .status(200)
-      .send("User has been logged out."+token);
-  };
-
-
 export const login = async (req, res, next) => {
     try {
       console.log("the login connect is on");
   
       // Find user by username
-      const user = await User.findOne({ username: req.body.username }).select('-FutureBooking -OldBooking');
+      const user = await User.findOne({  email: req.body.email });
       if (!user) return next(createError(404, "User not found!"));
   
       // Check password
@@ -346,16 +330,35 @@ export const login = async (req, res, next) => {
       console.log(token);
       // Exclude password from the response
       const { password, ...info } = user._doc;
-      const isSeller = info.isSeller;
+   
   
-      // Include seller data if user is a seller
-      if (isSeller) {
-        const sellerData = await Seller.findOne({ userID: user._id });
-        res.status(200).json({ token, info, sellerData });
-      } else {
+    
         res.status(200).json({ token, info });
-      }
+      
     } catch (err) {
       next(err);
     }
   };
+
+export const logout = async (req, res) => {
+    // Get the token from the authorization header
+    const authHeader = req.headers.authorization;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      console.log("\nThe access token is: " + token);
+      
+      // Clear the token cookie (if used)
+      res.clearCookie("accessToken", {
+        sameSite: "none",
+        secure: true,
+      })
+      .status(200)
+      .send("User has been logged out. Token: " + token);
+    } else {
+      res.status(400).send("Authorization token not provided or invalid.");
+    }
+
+
+};
+  

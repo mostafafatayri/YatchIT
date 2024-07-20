@@ -59,6 +59,11 @@ const userSchema = new Schema({
   OTPExpiry:{
     type:Date,
     required:true
+  },
+  bio:{
+    type:String,
+    required:false,
+    default:""
   }
 
 

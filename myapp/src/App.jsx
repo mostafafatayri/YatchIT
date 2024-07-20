@@ -16,6 +16,7 @@ import AddType from './pages/AddType/AddType';
 import AddBoat from "./pages/AddBoat/AddBoat";
 import Additional from './pages/Register/AdditionInfo';
 import VerifyEmail from "./pages/Register/VerifyEmail";
+import BoatPage from './pages/BoatPage/BoatPage';
 function App() {
   const queryClient = new QueryClient();
 
@@ -66,6 +67,9 @@ function App() {
         },{
           path:"/verifyEmail",
           element:<VerifyEmail/>
+        },{
+          path:"/BoatDetail",
+          element:<BoatPage/>
         }
       
         
