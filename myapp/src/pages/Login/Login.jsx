@@ -14,13 +14,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await newRequest.post('/auth/login', { email, password });
+      const response = await newRequest.post('/auth/login', { email, password }, { withCredentials: true });
       if (response.status === 200) {
-        const { token, info } = response.data;
-        // Save token and user info to local storage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userInfo', JSON.stringify(info));
-        navigate('/myaccount'); // Navigate to the profile page or another page
+        const { info } = response.data;
+        sessionStorage.setItem('userInfo', JSON.stringify(info));
+        navigate('/myaccount');
       } else {
         setError('Failed to login');
       }

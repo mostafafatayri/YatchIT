@@ -67,6 +67,16 @@ const YachtSchema = new Schema({
   Equipment:{
     type:[String],
     required:true
+  },
+  Ratings:{
+    type:Number,
+    require:false,
+    default:0
+  },
+  Raters :{
+    type:Number,
+    require:false,
+    default:0
   }
 
 

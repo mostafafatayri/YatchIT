@@ -300,7 +300,7 @@ function sendEmail(email,username, otp,userId,action) {
   
 // register of a user
 
-
+/*
 export const login = async (req, res, next) => {
     try {
       console.log("the login connect is on");
@@ -339,7 +339,9 @@ export const login = async (req, res, next) => {
       next(err);
     }
   };
-
+*/
+// previous logiut 
+/*
 export const logout = async (req, res) => {
     // Get the token from the authorization header
     const authHeader = req.headers.authorization;
@@ -361,4 +363,55 @@ export const logout = async (req, res) => {
 
 
 };
-  
+  */
+
+
+
+export const login = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return next(createError(404, 'User not found!'));
+
+    const isCorrect = bcrypt.compareSync(req.body.password, user.password);
+    if (!isCorrect) return next(createError(400, 'Wrong password or username!'));
+
+    const loginSessionId = uuidv4();
+    const token = jwt.sign(
+      {
+        sessionId: loginSessionId,
+        id: user._id,
+        //isSeller: user.isSeller,
+        loginTime: Date.now(),
+      },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
+
+    const { password, ...info } = user._doc;
+
+    res
+      .cookie('accessToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
+        sameSite: 'strict',
+      })
+      .status(200)
+      .json({ info });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    next(err);
+  }
+};

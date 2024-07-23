@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Review.scss';
+import Modal from './Modal';
 
 const Reviews = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+
   const reviews = [
     {
       name: 'Faddie Jaction',
@@ -19,6 +24,22 @@ const Reviews = () => {
     },
     // Add more reviews as needed
   ];
+
+  const handleAddReview = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setRating(0);
+    setFeedback('');
+  };
+
+  const handleSubmitReview = () => {
+    // Handle the submission logic here, such as sending the review to a server
+    console.log('Review submitted:', { rating, feedback });
+    handleCloseModal();
+  };
 
   return (
     <div className="reviews">
@@ -84,7 +105,16 @@ const Reviews = () => {
           </div>
         ))}
       </div>
-      <button className="add-review-button">Add Review</button>
+      <button className="add-review-button" onClick={handleAddReview}>Add Review</button>
+      <Modal
+        show={showModal}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitReview}
+        rating={rating}
+        setRating={setRating}
+        feedback={feedback}
+        setFeedback={setFeedback}
+      />
     </div>
   );
 };
