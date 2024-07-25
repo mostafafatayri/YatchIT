@@ -18,12 +18,21 @@ const Login = () => {
       if (response.status === 200) {
         const { info } = response.data;
         sessionStorage.setItem('userInfo', JSON.stringify(info));
+        
         navigate('/myaccount');
       } else {
         setError('Failed to login');
       }
     } catch (error) {
       setError('Failed to login');
+      if (error.response && error.response.status === 403) {
+        // User is not verified
+        setError(error.response.data.message);
+        console.log("the id of the user "+error.response.data.data.userId);
+        navigate('/verifyEmail', { state: { userId: error.response.data.data.userId } }); // Pass userId or email to verification page
+      } else {
+        setError('Failed to login. Please check your credentials and try again.');
+      }
     }
   };
 

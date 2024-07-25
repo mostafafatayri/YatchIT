@@ -33,10 +33,9 @@ const VerifyEmail = () => {
       if (response.status === 200) {
         const { token, info } = response.data;
         
-        // Save token and user info to local storage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userInfo', JSON.stringify(info));
+    
         
+        sessionStorage.setItem('userInfo', JSON.stringify(info));
         alert("OTP verified successfully");
         navigate("/myaccount"); // Redirect to the next step after successful verification
       } else {

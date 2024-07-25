@@ -18,6 +18,9 @@ import Additional from './pages/Register/AdditionInfo';
 import VerifyEmail from "./pages/Register/VerifyEmail";
 import BoatPage from './pages/BoatPage/BoatPage';
 import Dotenv from 'dotenv';
+import AddMarina from './pages/AddMarina/AddMarina';
+import AddSeller from './pages/AddSeller/AddSeller';
+import AddAdmin from './pages/AddAdmin/AddAdmin';
 //Dotenv.config();
 function App() {
   const queryClient = new QueryClient();
@@ -73,6 +76,15 @@ function App() {
         },{
           path:"/BoatDetail",
           element:<BoatPage/>
+        },{
+          path:"/add/marina",
+          element:<AddMarina/>
+        },{
+          path:"/add/seller",
+          element:<AddSeller/>
+        },{
+          path:"/add/Admin",
+          element:<AddAdmin/>
         }
       
         
@@ -89,22 +101,3 @@ export default App;
 
 
 
-/**import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Home from './pages/Home/Home';
-import './App.scss';
-
-const App = () => {
-  return (
-    <Router>
-      <div className="app">
-        <Switch>
-          <Route exact path="/" component={Home} />
-        </Switch>
-      </div>
-    </Router>
-  );
-};
-
-export default App;
-**/

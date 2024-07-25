@@ -410,6 +410,7 @@ const Profile = () => {
       try {
         const userInfo = sessionStorage.getItem("userInfo");
         if (userInfo) {
+          
           const userData = JSON.parse(userInfo);
           setFirstName(userData.firstname);
           setLastName(userData.lastname);

@@ -4,10 +4,28 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from 'nodemailer'
 import otpGenerator from "otp-generator";
-//import Request from "../models/CompanyVerify.model.js";
-//import Seller from "../models/Seller.model.js";
 import { v4 as uuidv4 } from 'uuid'; // UUID library for generating unique IDs
 
+export const Authorization = async(req,res,next)=>{
+
+  try{
+    const AuthorizzationAdmin = req.IsAdmin;
+    const AuthorizzationSeller = req.isSeller;
+
+    if(AuthorizzationAdmin==true){
+      res.status(200).send("the user is a admin");
+      
+    }else if(AuthorizzationSeller==true) {
+      res.status(200).send("the user is a seller");
+    }else {
+      res.status(200).send("the user has no other pred.");
+    }
+
+
+  }catch(err){
+    res.status(500).send("berb an error occured")
+  }
+}
 
 export const ResendEmailOTP = async (req, res, next) => {
   try {
@@ -44,7 +62,7 @@ export const ResendEmailOTP = async (req, res, next) => {
 export const verifyOTP = async (req, res, next) => {
   try {
     const { userId, otp } = req.body;
-    
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).send("User not found");
@@ -68,6 +86,59 @@ export const verifyOTP = async (req, res, next) => {
       {
         sessionId: loginSessionId,
         id: user._id,
+        IsSeller: user.IsSeller,
+        IsAdmin: user.IsAdmin,
+        loginTime: Date.now(),
+      },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' } // Token expires in 1 hour
+    );
+
+    // Exclude password from the response
+    const { password, ...info } = user._doc;
+
+    res
+      .cookie('accessToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      })
+      .status(200)
+      .json({ message: "OTP verified successfully", info });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** 
+export const verifyOTP = async (req, res, next) => {
+  try {
+    const { userId, otp } = req.body;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    if (user.OTP !== otp) {
+      return res.status(400).send("Invalid OTP");
+    }
+
+    const currentTime = new Date();
+    if (currentTime > user.OTPExpiry) {
+      return res.status(400).send("OTP has expired");
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    // Generate token
+    const loginSessionId = uuidv4();
+    const token = jwt.sign(
+      {
+        IsAdmin: user.IsAdmin,
+        sessionId: loginSessionId,
+        id: user._id,
         updateAt: user.updatedAt,
         loginTime: Date.now(), // Adding a timestamp to ensure the token varies with each login
       },
@@ -85,7 +156,7 @@ export const verifyOTP = async (req, res, next) => {
     next(err);
   }
 };
-
+**/
 
 // maybe add a check that make only unverify account to work on this 
 export const continueRegistration = async (req, res, next) => {
@@ -148,39 +219,7 @@ export const register = async (req, res, next) => {
   }
 };
 
-/*
-export const checkCompany = async (req, res) => {
-  const  allBody = req.body;
-  try {
-    const requestData = new Request({
-      userID: allBody.UserID,
-      businessName : allBody.businessName,
-      businessWebsite : allBody.businessWebsite? allBody.businessWebsite:'',
-      businessStructure: allBody.businessStructure?allBody.businessStructure:'',
-      businessDescription: allBody.businessDescription,
-      primaryContactName: allBody.primaryContactName,
-      primaryContactEmail: allBody.primaryContactEmail,
-      primaryContactPhone: allBody.primaryContactPhone,
-      streetAddress: allBody.streetAddress,
-      city: allBody.city,
-      Countrystate:allBody.Countrystate,
-      zip:allBody.zip,
-      country:allBody.country,
-      documentUrl: allBody.documentUrl,
-      Countrystate:allBody.state
-    })
-    // Save the application details to the database
-    await requestData.save();
 
-    console.log("the ap is working "+JSON.stringify(allBody));
-    res.status(200).json({ message: 'Application submitted successfully. We will review it shortly.' });
-  } catch (error) {
-    console.error("Error submitting seller application:", error);
-    res.status(500).json({ error: 'Failed to submit application' });
-  }
-};*/
-
-//// not finished yet need to work after finilizing add feature .
 
 export const ChangePassword = async (req, res, next) => {
   try {
@@ -204,8 +243,6 @@ export const ChangePassword = async (req, res, next) => {
     res.status(500).send("Error sending verification email");
   }
 };
-////
-
 
 
 // change the email :
@@ -297,73 +334,68 @@ function sendEmail(email,username, otp,userId,action) {
     });
   }
   
-  
-// register of a user
-
 /*
 export const login = async (req, res, next) => {
-    try {
-      console.log("the login connect is on");
-  
-      // Find user by username
-      const user = await User.findOne({  email: req.body.email });
-      if (!user) return next(createError(404, "User not found!"));
-  
-      // Check password
-      const isCorrect = bcrypt.compareSync(req.body.password, user.password);
-      if (!isCorrect) return next(createError(400, "Wrong password or username!"));
-  
-      const loginSessionId = uuidv4();
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return next(createError(404, 'User not found!'));
 
-     
-      // Create token with additional data
-      const token = jwt.sign(
-        {
-          sessionId: loginSessionId,
-          id: user._id,
-          isSeller: user.isSeller,
-          loginTime: Date.now(), // Adding a timestamp to ensure the token varies with each login
-        },
-        process.env.JWT_KEY,
-      //  { expiresIn: '1h' } // Token expires in 1 hour
-      );
-      console.log(token);
-      // Exclude password from the response
-      const { password, ...info } = user._doc;
-   
-  
-    
-        res.status(200).json({ token, info });
-      
-    } catch (err) {
-      next(err);
-    }
-  };
-*/
-// previous logiut 
-/*
-export const logout = async (req, res) => {
-    // Get the token from the authorization header
-    const authHeader = req.headers.authorization;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      console.log("\nThe access token is: " + token);
-      
-      // Clear the token cookie (if used)
-      res.clearCookie("accessToken", {
-        sameSite: "none",
-        secure: true,
+    const isCorrect = bcrypt.compareSync(req.body.password, user.password);
+    if (!isCorrect) return next(createError(400, 'Wrong password or username!'));
+
+
+    console.log("check if the user is vrf ");
+    if(user.isVerified){
+    const loginSessionId = uuidv4();
+    const token = jwt.sign(
+      {
+        sessionId: loginSessionId,
+        id: user._id,
+        IsSeller: user.IsSeller,
+        IsAdmin: user.IsAdmin,
+        loginTime: Date.now(),
+      },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
+
+    console.log("the user is : "+user.IsSeller);
+    const { password, ...info } = user._doc;
+
+    res
+      .cookie('accessToken', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
+        sameSite: 'strict',
       })
       .status(200)
-      .send("User has been logged out. Token: " + token);
-    } else {
-      res.status(400).send("Authorization token not provided or invalid.");
+      .json({ info });
+
+    }else {
+
+
     }
+  } catch (err) {
+    next(err);
+  }
 
 
 };
-  */
+*/
+
+
+export const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
 
 
 
@@ -375,42 +407,38 @@ export const login = async (req, res, next) => {
     const isCorrect = bcrypt.compareSync(req.body.password, user.password);
     if (!isCorrect) return next(createError(400, 'Wrong password or username!'));
 
-    const loginSessionId = uuidv4();
-    const token = jwt.sign(
-      {
-        sessionId: loginSessionId,
-        id: user._id,
-        //isSeller: user.isSeller,
-        loginTime: Date.now(),
-      },
-      process.env.JWT_KEY,
-      { expiresIn: '1h' }
-    );
+    if (user.isVerified) {
+      const loginSessionId = uuidv4();
+      const token = jwt.sign(
+        {
+          sessionId: loginSessionId,
+          id: user._id,
+          IsSeller: user.IsSeller,
+          IsAdmin: user.IsAdmin,
+          loginTime: Date.now(),
+        },
+        process.env.JWT_KEY,
+        { expiresIn: '1h' }
+      );
 
-    const { password, ...info } = user._doc;
+      const { password, ...info } = user._doc;
 
-    res
-      .cookie('accessToken', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
-        sameSite: 'strict',
-      })
-      .status(200)
-      .json({ info });
-  } catch (err) {
-    next(err);
-  }
-};
+      res
+        .cookie('accessToken', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+        })
+        .status(200)
+        .json({ info });
+    } else {
+      // User is not verified
+      res.status(403).json({
+        message: 'User is not verified. Please verify your email before logging in.',
+        data: { userId: user._id },
+      });
 
-
-export const logout = async (req, res, next) => {
-  try {
-    res.clearCookie('token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    });
-    res.status(200).json({ message: 'Logged out successfully' });
+    }
   } catch (err) {
     next(err);
   }

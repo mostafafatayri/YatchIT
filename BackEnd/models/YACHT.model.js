@@ -77,6 +77,10 @@ const YachtSchema = new Schema({
     type:Number,
     require:false,
     default:0
+  },MarinaID:{
+    type:String,
+    required:true,
+    
   }
 
 

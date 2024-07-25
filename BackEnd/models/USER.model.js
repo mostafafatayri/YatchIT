@@ -58,12 +58,21 @@ const userSchema = new Schema({
   },
   OTPExpiry:{
     type:Date,
-    required:true
+    required:false
   },
   bio:{
     type:String,
     required:false,
     default:""
+  },
+  IsSeller:{
+    type:Boolean,
+    default:false,
+
+  },
+  IsAdmin:{
+    type:Boolean,
+    required:false,
   }
 
 

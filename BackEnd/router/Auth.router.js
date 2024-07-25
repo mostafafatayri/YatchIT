@@ -5,7 +5,8 @@ import  {
           continueRegistration,
           verifyOTP,
           ResendEmailOTP,
-          logout
+          logout,
+          Authorization
         
         } from "../controller/Auth.controller.js"
 const router = express.Router();
@@ -17,7 +18,8 @@ router.post("/registration/moreInfo",continueRegistration);
 router.post("/registration/verifyOTP",verifyOTP);
 router.post("/registration/resendOTP",ResendEmailOTP);
 router.post("/login", login);
-router.post("/logout" ,verifyToken,logout)
+router.post("/logout" ,logout);
+router.get("/user_roles",verifyToken,Authorization);
 /** 
 router.delete("/DeleteMyAccount",verifyToken,deleteUser)
 

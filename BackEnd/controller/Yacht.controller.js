@@ -22,7 +22,8 @@ export const AddYatch = async (req, res, next) => {
       capacity,
       fuelEconomy,
       weight,
-      equipment
+      equipment,
+      marinaID
     } = req.body;
 
     console.log(req.body);
@@ -44,7 +45,8 @@ export const AddYatch = async (req, res, next) => {
       Capacity: parseInt(capacity), // Ensure the capacity is stored as a number
       Weight: weight,
       FuelEconomy: fuelEconomy,
-      Equipment: equipment // Array of equipment strings
+      Equipment: equipment, // Array of equipment strings
+      MarinaID:marinaID
     });
 
     // Save the new yacht to the database
