@@ -3,6 +3,10 @@ const { Schema } = mongoose;
 
 const YachtSchema = new Schema({
  
+  sellerID:{
+    type: String,
+    required: true,
+  },
   vehicleName: {
     type: String,
     required: true,
@@ -81,6 +85,9 @@ const YachtSchema = new Schema({
     type:String,
     required:true,
     
+  },RentDuration :{
+    type:String,
+    default:"per day"
   }
 
 

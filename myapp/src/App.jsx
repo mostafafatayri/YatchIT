@@ -21,6 +21,7 @@ import Dotenv from 'dotenv';
 import AddMarina from './pages/AddMarina/AddMarina';
 import AddSeller from './pages/AddSeller/AddSeller';
 import AddAdmin from './pages/AddAdmin/AddAdmin';
+import Dashboard from './pages/Dashboard/Dashboard';
 //Dotenv.config();
 function App() {
   const queryClient = new QueryClient();
@@ -74,7 +75,7 @@ function App() {
           path:"/verifyEmail",
           element:<VerifyEmail/>
         },{
-          path:"/BoatDetail",
+          path:"/BoatDetail/:id",
           element:<BoatPage/>
         },{
           path:"/add/marina",
@@ -85,6 +86,9 @@ function App() {
         },{
           path:"/add/Admin",
           element:<AddAdmin/>
+        },{
+          path:"/dashboard",
+          element:<Dashboard/>,
         }
       
         

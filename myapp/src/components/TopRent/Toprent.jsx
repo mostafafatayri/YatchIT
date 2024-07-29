@@ -1,6 +1,74 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Toprent.scss';
+import newRequest from '../../utils/newRequest';
+import { Link, useNavigate } from 'react-router-dom';
 
+const TopBoatRentals = () => {
+  const [boats, setBoats] = useState([]);
+
+  useEffect(() => {
+    const fetchBoats = async () => {
+      try {
+        const response = await newRequest.get('/yatch/getAll');
+        setBoats(response.data);
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoats();
+  }, []);
+
+  return (
+    <div className="top-boat-rentals">
+      <h2>Top Boat Rentals</h2>
+      <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      <div className="boats-grid">
+        {boats.map((boat) => (
+          <Link to={`/BoatDetail/${boat._id}`} key={boat._id}>
+            <div className="boat-card">
+              <div className="image-container">
+                <img src={boat.Images[0]} alt={boat.vehicleName} />
+                <div className="favorite-icon">❤️</div>
+              </div>
+              <div className="boat-info">
+                <h3>{boat.vehicleType}</h3>
+                <p>{boat.vehicleName}</p>
+                <p className="location">Location: {boat.MarinaID}</p>
+                <p className="price">
+                  ${boat.price} /{' '}
+                  {boat.RentDuration === 'per day' ? boat.RentDuration : `${boat.RentDuration} hours`}
+                </p>
+                <div className="rating">
+                  {Array.from({ length: Math.floor(boat.Ratings) }, (_, i) => (
+                    <span key={i}>⭐</span>
+                  ))}
+                  <span>({boat.Raters})</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TopBoatRentals;
+
+
+
+/**import React, { useEffect } from 'react';
+import './Toprent.scss';
+import newRequest from '../../utils/newRequest';
 const boats = [
     {
         name: 'Perfect set up for Lake Union cruising.',
@@ -87,6 +155,28 @@ const boats = [
 ];
 
 const TopBoatRentals = () => {
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const response = await newRequest.get('/yatch/getAll' );
+        alert(JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to fetch privileges', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+
+          //navigate('/login'); // Navigate to login page
+        } else {
+          alert('Failed to fetch privileges. Please try again.');
+        }
+      }
+    };
+
+    fetchRole();
+  }, []);
   return (
     <div className="top-boat-rentals">
       <h2>Top Boat Rentals</h2>
@@ -118,3 +208,4 @@ const TopBoatRentals = () => {
 };
 
 export default TopBoatRentals;
+ */

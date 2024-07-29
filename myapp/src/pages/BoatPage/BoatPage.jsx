@@ -22,7 +22,7 @@ const BoatPage = () => {
       <div className="content-container">
         <div className="left-container">
 
-          <ImageGallery />
+        
           <BoatDetails />
         </div>
         <BookingDetails />

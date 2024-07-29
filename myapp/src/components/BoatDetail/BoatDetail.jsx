@@ -1,10 +1,139 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css'; // Import the calendar CSS
 import './BoatDetail.scss';
 import Reviews from '../../components/Reviews/Review.jsx';
-
+import newRequest from '../../utils/newRequest.js';
+import { useParams } from 'react-router-dom';
+import ImageGallery from '../../components/ImageGallery/ImageGallery';
 const BoatDetails = () => {
+  const { id } = useParams();
+  const [boat, setBoat] = useState(null);
+  const [date, setDate] = useState(new Date());
+
+  useEffect(() => {
+    const fetchBoat = async () => {
+      try {
+        const response = await newRequest.get(`/yatch/getYacht/${id}`);
+        setBoat(response.data);
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoat();
+  }, [id]);
+
+  if (!boat) {
+    return <div>Loading...</div>;
+  }
+
+  const onboardEquipmentImages = {
+    'Outboard Motor': '/img/motor.png',
+    'Hot Water': '/img/water.png',
+    'Automatic Pilot': '/img/yacht.png',
+    'Deck Shower': '/img/shower.png',
+    'GPS': '/img/gps.png',
+    'Cockpit Table': '/img/table.png',
+    'Wi Fi': '/img/wifi.png',
+    'TV': '/img/tv.png',
+    'Fire Detector': '/img/detector.png',
+    'Speakers': '/img/speakers.png',
+    'Boarding Ladder': '/img/ladder.png',
+    'First Aid Kit': '/img/aid.png',
+  };
+
+  const specifications = [
+    { label: 'Engine Torque', value: boat.Torque },
+    { label: 'Engine', value: boat.Engine },
+    { label: 'Fuel System', value: boat.FuelSystem },
+    { label: 'Bore x Stroke', value: boat.boreStroke },
+    { label: 'Fuel Capacity', value: boat.FuelCap },
+    { label: 'Weight', value: boat.Weight },
+    
+    { label: 'Capacity', value: `${boat.Capacity} cu ft` },
+  ];
+
+  return (
+    <div className="boat-details">
+      <ImageGallery images={boat.Images} />
+      <h2>{boat.vehicleName}</h2>
+      <p>Santa Maria Maggiore, Milazzo</p>
+      <p>{boat.Guests} guests · {boat.bedrooms} Cabins · {boat.bathrooms} bathrooms</p>
+      <p>{boat.description}</p>
+      
+      <h3>On Board Equipment</h3>
+      <div className="equipment-options">
+        {boat.Equipment.map((item, index) => (
+          <div key={index} className="equipment-option">
+            <img src={onboardEquipmentImages[item]} alt={item} />
+            <label>{item}</label>
+          </div>
+        ))}
+      </div>
+
+      <h3>Specifications</h3>
+      <div className="specifications">
+        {specifications.map((item, index) => (
+          <div key={index} className="specification">
+            <div className="label">{item.label}</div>
+            <div className="value">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <h3>Availability</h3>
+      <Calendar
+        onChange={setDate}
+        value={date}
+        selectRange={true}
+      />
+
+      <Reviews/>
+    </div>
+  );
+};
+
+export default BoatDetails;
+
+
+/*import React, { useState ,useEffect} from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css'; // Import the calendar CSS
+import './BoatDetail.scss';
+import Reviews from '../../components/Reviews/Review.jsx';
+import newRequest from '../../utils/newRequest.js';
+import { useParams } from 'react-router-dom';
+const BoatDetails = () => {
+
+  const {id} = useParams();
+  alert(id);
+  useEffect(() => {
+    const fetchBoat = async () => {
+      try {
+        const response = await newRequest.get(`/yatch/getYacht/${id}`);
+        alert(JSON.stringify(response));
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoat();
+  }, []);
+
   const [date, setDate] = useState(new Date());
 
   const onboardEquipment = [
@@ -75,4 +204,4 @@ const BoatDetails = () => {
   );
 };
 
-export default BoatDetails;
+export default BoatDetails; */

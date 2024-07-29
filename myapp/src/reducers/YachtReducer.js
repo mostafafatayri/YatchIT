@@ -1,4 +1,5 @@
 export const INITIAL_STATE = {
+  sellerID: '',
   title: '',
   boatType: '',
   price: '',
@@ -46,6 +47,11 @@ export const boatReducer = (state, action) => {
       return {
         ...state,
         marinaID: action.payload,
+      };
+    case 'SET_SELLER_ID':
+      return {
+        ...state,
+        sellerID: action.payload,
       };
     default:
       return state;

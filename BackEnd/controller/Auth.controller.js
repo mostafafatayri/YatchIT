@@ -408,13 +408,14 @@ export const login = async (req, res, next) => {
     if (!isCorrect) return next(createError(400, 'Wrong password or username!'));
 
     if (user.isVerified) {
+      console.log("the login in is sign token  "+user.IsSeller);
       const loginSessionId = uuidv4();
       const token = jwt.sign(
         {
           sessionId: loginSessionId,
           id: user._id,
           IsSeller: user.IsSeller,
-          IsAdmin: user.IsAdmin,
+          IsAdmin:user.IsAdmin,
           loginTime: Date.now(),
         },
         process.env.JWT_KEY,

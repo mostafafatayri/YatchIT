@@ -7,6 +7,7 @@ const Explore = () => {
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 
+
   const toggleFilterVisibility = () => {
     setIsFilterVisible(!isFilterVisible);
   };

@@ -18,9 +18,11 @@ export const verifyToken = (req, res, next) => {
       }
     }
     req.userId = payload.id;
-    req.isSeller = payload.isSeller;
-    req.isAdmin = payload.isAdmin;
+    req.isSeller = payload.IsSeller;
+    req.isAdmin = payload.IsAdmin;
     console.log('the userID:', payload.id);
+    console.log('the role:', payload.IsSeller);
+    console.log('the is he admin:', payload.IsAdmin);
     next();
   });
 };
