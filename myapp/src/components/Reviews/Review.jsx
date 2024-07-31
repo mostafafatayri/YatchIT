@@ -1,29 +1,32 @@
-import React, { useState } from 'react';
+/** 
+import React, { useState, useEffect } from 'react';
 import './Review.scss';
 import Modal from './Modal';
+import newRequest from '../../utils/newRequest';
+import moment from 'moment'; // To format the date
 
-const Reviews = () => {
+const Reviews = ({ yachtId,ratings }) => {
+  alert(ratings);
   const [showModal, setShowModal] = useState(false);
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState('');
+  const [reviewss, setReviews] = useState([]);
 
-  const reviews = [
-    {
-      name: 'Faddie Jaction',
-      date: '26 Oct, 2022 9:34 pm',
-      location: 'San Diago CA',
-      rating: 5,
-      review: `I bought two of these hoodies - one for my husband, and an XS for myself. I don't find the quality of this cashmere to be any better than what you'd find at a major retailer. It's fine for the price point, but we both experienced pilling on the very first wear, and it gets worse with each wear. So it probably will not have a long life. That said, it's a great leisure-wear piece that looks more pulled together than wearing a yoga brand zip-up, and I would buy another if they made this piece in grey.`
-    },
-    {
-      name: 'Faddie Jaction',
-      date: '26 Oct, 2022 9:34 pm',
-      location: 'San Diago CA',
-      rating: 5,
-      review: `I bought two of these hoodies - one for my husband, and an XS for myself. I don't find the quality of this cashmere to be any better than what you'd find at a major retailer. It's fine for the price point, but we both experienced pilling on the very first wear, and it gets worse with each wear. So it probably will not have a long life. That said, it's a great leisure-wear piece that looks more pulled together than wearing a yoga brand zip-up, and I would buy another if they made this piece in grey.`
-    },
-    // Add more reviews as needed
-  ];
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+       
+        const id = yachtId;  // Extract yachtId correctly
+        const response = await newRequest.get(`/yatch/reviews/getreviews/${id}`);
+        setReviews(response.data);
+      } catch (error) {
+        console.error('Failed to fetch reviews', error);
+        alert('Failed to fetch reviews. Please try again.');
+      }
+    };
+
+    fetchReviews();
+  }, [yachtId]);
 
   const handleAddReview = () => {
     setShowModal(true);
@@ -43,7 +46,7 @@ const Reviews = () => {
 
   return (
     <div className="reviews">
-      <h3>35 Reviews</h3>
+      <h3>{reviewss.length} Reviews</h3>
       <div className="ratings-summary">
         <h2>4.5</h2>
         <p>35 Ratings</p>
@@ -86,22 +89,22 @@ const Reviews = () => {
         </div>
       </div>
       <div className="review-list">
-        {reviews.map((review, index) => (
+        {reviewss.map((review, index) => (
           <div key={index} className="review">
             <div className="review-header">
               <div className="reviewer-info">
                 <img src="https://tripfinder-boat.vercel.app/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fmen%2F64.jpg&w=3840&q=75" alt="Reviewer" />
                 <div>
-                  <h4>{review.name}</h4>
-                  <p>{review.date}</p>
+                  <h4>{review.user.firstname} {review.user.lastname}</h4>
+                  <p>{moment(review.createdAt).format('DD MMM, YYYY hh:mm a')}</p>
                 </div>
               </div>
               <div className="review-location">
                 <span>{'★'.repeat(review.rating)}</span>
-                <p>{review.location}</p>
+                <p>{review.user.Country}</p>
               </div>
             </div>
-            <p>{review.review}</p>
+            <p>{review.feedback}</p>
           </div>
         ))}
       </div>
@@ -114,6 +117,113 @@ const Reviews = () => {
         setRating={setRating}
         feedback={feedback}
         setFeedback={setFeedback}
+        yachtId={yachtId} 
+      />
+    </div>
+  );
+};
+
+export default Reviews;
+**/
+
+
+import React, { useState, useEffect } from 'react';
+import './Review.scss';
+import Modal from './Modal';
+import newRequest from '../../utils/newRequest';
+import moment from 'moment'; // To format the date
+
+const Reviews = ({ yachtId, ratings }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [reviewss, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const id = yachtId;  // Extract yachtId correctly
+        const response = await newRequest.get(`/yatch/reviews/getreviews/${id}`);
+        setReviews(response.data);
+      } catch (error) {
+        console.error('Failed to fetch reviews', error);
+        alert('Failed to fetch reviews. Please try again.');
+      }
+    };
+
+    fetchReviews();
+  }, [yachtId]);
+
+  const handleAddReview = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setRating(0);
+    setFeedback('');
+  };
+
+  const handleSubmitReview = () => {
+    // Handle the submission logic here, such as sending the review to a server
+    console.log('Review submitted:', { rating, feedback });
+    handleCloseModal();
+  };
+
+  // Calculate total reviews and percentages
+  const totalReviews = ratings.reduce((sum, count) => sum + count, 0);
+  const averageRating = ratings.reduce((sum, count, index) => sum + count * index, 0) / totalReviews;
+
+  const percentageRatings = ratings.map(count => (count / totalReviews) * 100);
+
+  return (
+    <div className="reviews">
+      <h3>{totalReviews} Reviews</h3>
+      <div className="ratings-summary">
+        <h2>{averageRating.toFixed(1)}</h2>
+        <p>{totalReviews} Ratings</p>
+        <div className="rating-breakdown">
+          {percentageRatings.slice(1).map((percentage, index) => (
+            <div className="rating-bar" key={index}>
+              <span>{1 + index} Star</span>
+              <div className="bar">
+                <div className="filled" style={{ width: `${percentage}%` }}></div>
+              </div>
+              <span>{percentage.toFixed(1)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="review-list">
+        {reviewss.map((review, index) => (
+          <div key={index} className="review">
+            <div className="review-header">
+              <div className="reviewer-info">
+                <img src="https://tripfinder-boat.vercel.app/_next/image?url=https%3A%2F%2Frandomuser.me%2Fapi%2Fportraits%2Fmen%2F64.jpg&w=3840&q=75" alt="Reviewer" />
+                <div>
+                  <h4>{review.user.firstname} {review.user.lastname}</h4>
+                  <p>{moment(review.createdAt).format('DD MMM, YYYY hh:mm a')}</p>
+                </div>
+              </div>
+              <div className="review-location">
+                <span>{'★'.repeat(review.rating)}</span>
+                <p>{review.user.Country}</p> {/* Static location */}
+              </div>
+            </div>
+            <p>{review.feedback}</p>
+          </div>
+        ))}
+      </div>
+      <button className="add-review-button" onClick={handleAddReview}>Add Review</button>
+      <Modal
+        show={showModal}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitReview}
+        rating={rating}
+        setRating={setRating}
+        feedback={feedback}
+        setFeedback={setFeedback}
+        yachtId={yachtId}
       />
     </div>
   );

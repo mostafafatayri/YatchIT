@@ -33,6 +33,7 @@ const BoatDetails = () => {
   if (!boat) {
     return <div>Loading...</div>;
   }
+  const Ratings = boat.ratings
 
   const onboardEquipmentImages = {
     'Outboard Motor': '/img/motor.png',
@@ -95,7 +96,7 @@ const BoatDetails = () => {
         selectRange={true}
       />
 
-      <Reviews/>
+      <Reviews yachtId={boat._id} ratings={Ratings} />
     </div>
   );
 };

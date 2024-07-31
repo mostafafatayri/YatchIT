@@ -88,6 +88,10 @@ const YachtSchema = new Schema({
   },RentDuration :{
     type:String,
     default:"per day"
+  },
+  ratings: {
+    type: [Number],
+    default: [0, 0, 0, 0, 0, 0]  // Initialize the array with six zeros
   }
 
 

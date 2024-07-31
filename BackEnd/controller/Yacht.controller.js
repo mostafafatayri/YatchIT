@@ -1,6 +1,9 @@
 import User from "../models/USER.model.js";
 import createError from "../utils/createError.js";
 import Yacht from "../models/YACHT.model.js";
+import Review from "../models/REVIEWS.model.js";
+import mongoose from "mongoose";
+
 
 export const AddYatch = async (req, res, next) => {
   try {
@@ -79,7 +82,6 @@ export const AddYatch = async (req, res, next) => {
 };
  
 
-
 export const GetAYacht = async (req, res, next) => {
   try {
     const yachtId = req.params.id;
@@ -116,3 +118,93 @@ export const GetFullYatchs = async(req,res,next)=>{
   }
 
 }
+
+
+export const AddReview = async (req, res, next) => {
+  const { userId, yachtId, rating, feedback } = req.body;
+
+  try {
+    // Validate the input data
+    if (!userId || !yachtId || !rating || !feedback) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Create a new review object
+    const newReview = new Review({
+      userId,
+      yachtId,
+      rating,
+      feedback,
+      createdAt: new Date()
+    });
+
+    // Save the review to the database
+    const savedReview = await newReview.save();
+
+    // Update the ratings array in the Yacht document
+    const yacht = await Yacht.findById(yachtId);
+    if (!yacht) {
+      return res.status(404).json({ message: 'Yacht not found' });
+    }
+
+    // Increment the appropriate index in the ratings array
+    yacht.ratings[rating]++;
+    await yacht.save();
+
+    // Respond with the saved review
+    res.status(201).json(savedReview);
+  } catch (error) {
+    console.error('Error adding review:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+export const getYachtReviews = async (req, res, next) => {
+  const { id: yachtID } = req.params; // Correctly extract yachtID from req.params
+
+  console.log(`Fetching reviews for yachtID: ${yachtID}`);
+
+  try {
+    // Ensure yachtID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(yachtID)) {
+      return res.status(400).json({ message: 'Invalid yacht ID' });
+    }
+
+    // Convert yachtID to ObjectId
+    const objectIdYachtID = new mongoose.Types.ObjectId(yachtID);
+
+    // Fetch reviews and join with user information
+    const reviews = await Review.aggregate([
+      { $match: { yachtId: objectIdYachtID } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          rating: 1,
+          feedback: 1,
+          createdAt: 1,
+          'user.firstname': 1,
+          'user.lastname': 1,
+          'user.Country':1
+        }
+      }
+    ]);
+
+    // Respond with the fetched reviews
+    res.status(200).json(reviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
