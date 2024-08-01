@@ -11,8 +11,8 @@ import newRequest from '../../utils/newRequest.js';
 const TopDestinations = () => {
   const navigate = useNavigate();
 
-  const handleCardClick = (destination) => {
-    navigate('/explore', { state: { filter: destination } });
+  const handleCardClick = (marina) => {
+    navigate('/explore', { state: { filter: marina.marinaName} });
   };
 
   const queryClient = useQueryClient();
