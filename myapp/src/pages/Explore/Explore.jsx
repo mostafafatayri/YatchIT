@@ -2,8 +2,12 @@ import React, { useState } from 'react';
 import './Explore.scss';
 import TopBoatRentals from '../../components/TopRent/Toprent';
 import { MdFilterList } from "react-icons/md";
+import { useLocation } from 'react-router-dom';
 
 const Explore = () => {
+  const location = useLocation();
+  const filter = location.state?.filter; // Accessing the passed state
+ // alert(JSON.stringify(filter));
   const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 

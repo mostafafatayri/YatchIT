@@ -1,7 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './BookingDetails.scss';
+import { useParams } from 'react-router-dom';
+const BookingDetails = (boatDetails) => {
 
-const BookingDetails = () => {
+  const { id } = useParams();
+  const [boat, setBoat] = useState(null);
+  const [date, setDate] = useState(new Date());
+  
+
+
+  useEffect(() => {
+    const fetchBoat = async () => {
+      try {
+        const data= boatDetails.boatDetails;
+      //  alert("from inside the compm fo the card payment  "+JSON.stringify(data));
+        setBoat(data);
+      } catch (error) {
+        setBoat("error fetching the data");
+      }
+    };
+
+    fetchBoat();
+  }, [id]);
+
   const [showGuestOptions, setShowGuestOptions] = useState(false);
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
@@ -10,10 +31,13 @@ const BookingDetails = () => {
   const handleGuestOptionsToggle = () => {
     setShowGuestOptions(!showGuestOptions);
   };
+  if (!boat) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="booking-details">
-      <h2>$215 / night</h2>
+      <h2>${boat.price} / {boat.RentDuration} </h2>
       <p>4.5 (35 reviews)</p>
       <form>
         <div className="date-inputs">
@@ -35,19 +59,19 @@ const BookingDetails = () => {
             <div className="guest-options">
               <div className="guest-option">
                 <label>Adults</label>
-                <button type="button" onClick={() => setAdults(adults - 1)} disabled={adults <= 1}>-</button>
+                <button type="button"  className="apply-buttonChange" onClick={() => setAdults(adults - 1)} disabled={adults <= 1}>-</button>
                 <span>{adults}</span>
-                <button type="button" onClick={() => setAdults(adults + 1)}>+</button>
+                <button type="button" className="apply-buttonChange" onClick={() => setAdults(adults + 1)}>+</button>
               </div>
               <div className="guest-option">
                 <label>Children</label>
-                <button type="button" onClick={() => setChildren(children - 1)} disabled={children <= 0}>-</button>
+                <button type="button"  className="apply-buttonChange" onClick={() => setChildren(children - 1)} disabled={children <= 0}>-</button>
                 <span>{children}</span>
-                <button type="button" onClick={() => setChildren(children + 1)}>+</button>
+                <button type="button" className="apply-buttonChange" onClick={() => setChildren(children + 1)}>+</button>
               </div>
               <div className="guest-option">
                 <label>Pets</label>
-                <button type="button" onClick={() => setPets(!pets)}>{pets ? "No" : "Yes"}</button>
+                <button type="button"  className="apply-buttonChange" onClick={() => setPets(!pets)}>{pets ? "No" : "Yes"}</button>
               </div>
               <button type="button" className="apply-button" onClick={handleGuestOptionsToggle}>Apply</button>
             </div>
@@ -69,3 +93,7 @@ const BookingDetails = () => {
 };
 
 export default BookingDetails;
+
+
+
+

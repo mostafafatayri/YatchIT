@@ -9,7 +9,7 @@ import Marina from "../models/MARINA.model.js";
 export const AddMarina = async (req, res, next) => {
     try {
         // Destructure the data from req.body
-        const { marinaName, location, capacity, facilities, contact, description } = req.body;
+        const { marinaName, location, capacity, facilities, contact, description, Image } = req.body;
 
         // Create a new Marina document
         const newMarina = new Marina({
@@ -18,7 +18,8 @@ export const AddMarina = async (req, res, next) => {
             capacity,
             facilities,
             contact,
-            description
+            description,
+            Image // Ensure this matches what you send from the frontend
         });
 
         // Save the document to the database
@@ -31,14 +32,15 @@ export const AddMarina = async (req, res, next) => {
         console.error(err);
         next(createError(500, "Internal server issue"));
     }
-};
+}
+
 
 export const getMarinas = async (req, res, next) => {
     try {
        
         const marinas = await Marina.find();
 
-        
+        console.log(marinas+" all the data \n");
         res.status(200).json(marinas);
     } catch (err) {
       

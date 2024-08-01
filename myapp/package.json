@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.50.1",
+    "@tanstack/react-query": "^5.51.16",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "gapi-script": "^1.2.0",

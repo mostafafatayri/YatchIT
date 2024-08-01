@@ -8,7 +8,7 @@ import uploadToCloudinary from '../../utils/upload';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
-
+import { useQuery } from '@tanstack/react-query';
 
 const AddAdmin = () => {
   const [state, dispatch] = useReducer(sellerReducer, INITIAL_SELLER_STATE);
@@ -16,7 +16,39 @@ const AddAdmin = () => {
   const [uploading, setUploading] = useState(false);
 
   const navigate = useNavigate();
+  const userInfo = sessionStorage.getItem("userInfo");
+  const userData = userInfo ? JSON.parse(userInfo) : {};
+  const username = userData.firstname;
+  const queryClient = useQueryClient();
+  const { isLoading, error, data: userRoleData } = useQuery({
+    queryKey: ['user_auth'+userData._id],
+    queryFn: () =>
+      newRequest.get('/auth/user_roles', { withCredentials: true }).then((res) => res.data),
+    onError: (error) => {
+      console.error('Failed to fetch privileges', error);
 
+      if (error.response && error.response.status === 401) {
+        console.log("we got an eror");
+        alert('Session expired. Please log in again.');
+        navigate('/login');
+      } else {
+        alert('Failed to fetch privileges. Please try again.');
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (userRoleData) {
+      console.log("User Role Data: ", userRoleData);
+      if (userRoleData === "no") {
+        alert('You do not have access to this page.');
+        navigate('/');
+      } else {
+        console.log("access");
+        //alert(userRoleData);
+      }
+    }
+  }, [userRoleData, navigate]);
   
 
   const handleInputChange = (e) => {
@@ -52,7 +84,7 @@ const AddAdmin = () => {
     }
   };
 
-  const queryClient = useQueryClient();
+  
 
   const mutation = useMutation({
     mutationFn: async (sellerData) => {

@@ -6,29 +6,31 @@ import Reviews from '../../components/Reviews/Review.jsx';
 import newRequest from '../../utils/newRequest.js';
 import { useParams } from 'react-router-dom';
 import ImageGallery from '../../components/ImageGallery/ImageGallery';
-const BoatDetails = () => {
+import BookingDetails from '../../components/BookingDetails/BookingDetails';
+
+const BoatDetails = (boatDetails) => {
+ 
   const { id } = useParams();
   const [boat, setBoat] = useState(null);
   const [date, setDate] = useState(new Date());
+  
+
 
   useEffect(() => {
     const fetchBoat = async () => {
       try {
-        const response = await newRequest.get(`/yatch/getYacht/${id}`);
-        setBoat(response.data);
+        const data= boatDetails.boatDetails;
+       // alert("from inside the component "+JSON.stringify(data));
+        setBoat(data);
       } catch (error) {
-        console.error('Failed to fetch boats', error);
-        // Handle JWT expiration error
-        if (error.response && error.response.status === 401) {
-          alert('Session expired. Please log in again.');
-        } else {
-          alert('Failed to fetch boats. Please try again.');
-        }
+        setBoat("error fetching the data");
       }
     };
 
     fetchBoat();
   }, [id]);
+
+
 
   if (!boat) {
     return <div>Loading...</div>;
@@ -97,6 +99,8 @@ const BoatDetails = () => {
       />
 
       <Reviews yachtId={boat._id} ratings={Ratings} />
+
+   
     </div>
   );
 };

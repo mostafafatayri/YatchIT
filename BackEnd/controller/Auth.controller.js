@@ -9,16 +9,18 @@ import { v4 as uuidv4 } from 'uuid'; // UUID library for generating unique IDs
 export const Authorization = async(req,res,next)=>{
 
   try{
-    const AuthorizzationAdmin = req.IsAdmin;
+    const AuthorizzationAdmin = req.isAdmin?req.isAdmin:'';
     const AuthorizzationSeller = req.isSeller;
 
-    if(AuthorizzationAdmin==true){
-      res.status(200).send("the user is a admin");
+    console.log("the aut "+ AuthorizzationAdmin);
+    if(AuthorizzationAdmin==true ){
+      res.status(200).send("admin");
       
     }else if(AuthorizzationSeller==true) {
-      res.status(200).send("the user is a seller");
+      res.status(200).send("seller");
     }else {
-      res.status(200).send("the user has no other pred.");
+      console.log(" i am going to send no\n")
+      res.status(200).send("no");
     }
 
 

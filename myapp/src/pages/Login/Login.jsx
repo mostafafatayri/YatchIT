@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import './Login.scss';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaFacebookF, FaGoogle, FaApple } from 'react-icons/fa';
@@ -10,6 +10,27 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  
+
+
+  useEffect(() => {
+    const logout = async () => {
+      try {
+        console.log("print test ");
+        await newRequest.post('/auth/logout', {}, { withCredentials: true });
+        sessionStorage.removeItem('userInfo');
+      } catch (error) {
+        console.error('Failed to logout', error);
+      }
+    };
+
+    logout();
+  }, [navigate]);
+  
+  
+  
+  
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

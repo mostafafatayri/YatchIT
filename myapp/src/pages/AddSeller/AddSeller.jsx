@@ -2,7 +2,7 @@ import React, { useReducer, useState, useEffect } from 'react';
 import './AddSeller.scss';
 import { sellerReducer, INITIAL_SELLER_STATE } from '../../reducers/SellerReducer';
 import newRequest from '../../utils/newRequest';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient,useQuery } from '@tanstack/react-query';
 import { useDropzone } from 'react-dropzone';
 import uploadToCloudinary from '../../utils/upload';
 import DatePicker from 'react-datepicker';
@@ -14,9 +14,43 @@ const AddSeller = () => {
   const [state, dispatch] = useReducer(sellerReducer, INITIAL_SELLER_STATE);
   const [boats, setBoats] = useState([]);
   const [uploading, setUploading] = useState(false);
+//
+const userInfo = sessionStorage.getItem("userInfo");
+const userData = userInfo ? JSON.parse(userInfo) : {};
+const username = userData.firstname;
 
+//
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { isLoading, error, data: userRoleData } = useQuery({
+    queryKey: ['user_auth'+userData._id],
+    queryFn: () =>
+      newRequest.get('/auth/user_roles', { withCredentials: true }).then((res) => res.data),
+    onError: (error) => {
+      console.error('Failed to fetch privileges', error);
 
+      if (error.response && error.response.status === 401) {
+        console.log("we got an eror");
+        alert('Session expired. Please log in again.');
+        navigate('/login');
+      } else {
+        alert('Failed to fetch privileges. Please try again.');
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (userRoleData) {
+      console.log("User Role Data: ", userRoleData);
+      if (userRoleData === "no") {
+        alert('You do not have access to this page.');
+        navigate('/');
+      } else {
+        console.log("access");
+        //alert(userRoleData);
+      }
+    }
+  }, [userRoleData, navigate]);
   
 
   const handleInputChange = (e) => {
@@ -62,7 +96,8 @@ const AddSeller = () => {
     }
   };
 
-  const queryClient = useQueryClient();
+
+
 
   const mutation = useMutation({
     mutationFn: async (sellerData) => {

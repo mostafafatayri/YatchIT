@@ -2,7 +2,7 @@ import React, { useReducer, useEffect } from 'react';
 import './Modal.scss';
 import { modalReducer, initialState } from '../../reducers/ReviewsReducer';
 import newRequest from '../../utils/newRequest';
-
+/// need to cache the reviews as well ---> second increment 
 const Modal = ({ show, onClose, yachtId }) => {
   console.log("from the model : "+JSON.stringify(yachtId));
  

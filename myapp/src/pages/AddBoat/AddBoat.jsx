@@ -4,7 +4,7 @@ import './AddBoat.scss';
 import { useDropzone } from 'react-dropzone';
 import newRequest from '../../utils/newRequest';
 import { boatReducer, INITIAL_STATE } from '../../reducers/YachtReducer.js';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery,useMutation, useQueryClient } from '@tanstack/react-query';
 import upload from '../../utils/upload';
 
 const AddBoat = () => {
@@ -14,6 +14,41 @@ const AddBoat = () => {
   const [marinas, setMarinas] = useState([]);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
+  const userInfo = sessionStorage.getItem("userInfo");
+  const userData = userInfo ? JSON.parse(userInfo) : {};
+  const username = userData.firstname;
+
+
+  const { isLoading, error:errorfetch, data: userRoleData } = useQuery({
+    queryKey: ['user_auth'+userData._id],
+    queryFn: () =>
+      newRequest.get('/auth/user_roles', { withCredentials: true }).then((res) => res.data),
+    onError: (error) => {
+      console.error('Failed to fetch privileges', error);
+
+      if (error.response && error.response.status === 401) {
+        console.log("we got an eror");
+        alert('Session expired. Please log in again.');
+        navigate('/login');
+      } else {
+        alert('Failed to fetch privileges. Please try again.');
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (userRoleData) {
+      console.log("User Role Data: ", userRoleData);
+      if (userRoleData === "no") {
+        alert('You do not have access to this page.');
+        navigate('/');
+      } else {
+        console.log("access");
+        //alert(userRoleData);
+      }
+    }
+  }, [userRoleData, navigate]);
+
   useEffect(() => {
     // Fetch sellerID from localStorage or any secure storage
     const sellerID = sessionStorage.getItem('userInfo');

@@ -28,6 +28,11 @@ const MarinaSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  Image:
+  {
+    type:String,
+    required:true
+  }
 });
 
 const Marina = mongoose.model('Marina', MarinaSchema);
