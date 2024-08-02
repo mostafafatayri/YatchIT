@@ -33,7 +33,7 @@ const AddBoat = () => {
       } else {
         alert('Failed to fetch privileges. Please try again.');
       }
-    }
+    } 
   });
 
   useEffect(() => {

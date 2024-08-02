@@ -40,7 +40,7 @@ export const getMarinas = async (req, res, next) => {
        
         const marinas = await Marina.find();
 
-        console.log(marinas+" all the data \n");
+      //  console.log(marinas+" all the data \n");
         res.status(200).json(marinas);
     } catch (err) {
       

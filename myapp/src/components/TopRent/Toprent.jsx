@@ -1,22 +1,55 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import './Toprent.scss';
 import newRequest from '../../utils/newRequest';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const TopBoatRentals = () => {
+const TopBoatRentals = ({ filters }) => {
   const [boats, setBoats] = useState([]);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const fetchBoats = async () => {
       try {
-        const response = await newRequest.get('/yatch/getAll');
-        setBoats(response.data);
+        let response;
+        if (filters && Object.keys(filters).length > 0) {
+          response = await newRequest.get('/yatch/getAll', {
+            params: {
+              marina: filters.marina,
+              tripDate: filters.tripDate,
+              boatType: filters.boatType,
+              minPrice: filters.priceRange.min,
+              maxPrice: filters.priceRange.max,
+              numberOfPeople: filters.numberOfPeople,
+              withCrew: filters.withCrew,
+              freeCancellation: filters.freeCancellation,
+              sailboat: filters.categories.sailboat,
+              motorboat: filters.categories.motorboat,
+              catamaran: filters.categories.catamaran,
+              yacht: filters.categories.yacht,
+              jetSki: filters.categories.jetSki,
+              dinghy: filters.categories.dinghy,
+            },
+          });
+        } else {
+          response = await newRequest.get('/yatch/getAll');
+        }
+
+        if (response.data.length === 0) {
+          setBoats([]);
+          setMessage('No boats match your request');
+        } else {
+          setBoats(response.data);
+          setMessage('');
+        }
       } catch (error) {
         console.error('Failed to fetch boats', error);
 
-        // Handle JWT expiration error
         if (error.response && error.response.status === 401) {
           alert('Session expired. Please log in again.');
+        } else if (error.response && error.response.data.message === 'No yachts found') {
+          setBoats([]);
+          setMessage('No boats match your request');
         } else {
           alert('Failed to fetch boats. Please try again.');
         }
@@ -24,12 +57,14 @@ const TopBoatRentals = () => {
     };
 
     fetchBoats();
-  }, []);
+  }, [filters]);
 
   return (
     <div className="top-boat-rentals">
       <h2>Top Boat Rentals</h2>
       <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      {message && <p className="message">{message}</p>}
 
       <div className="boats-grid">
         {boats.map((boat) => (
@@ -42,7 +77,7 @@ const TopBoatRentals = () => {
               <div className="boat-info">
                 <h3>{boat.vehicleType}</h3>
                 <p>{boat.vehicleName}</p>
-                <p className="location">Location: {boat.MarinaID}</p>
+                <p className="location">Location: {boat.marinaName}</p>
                 <p className="price">
                   ${boat.price} /{' '}
                   {boat.RentDuration === 'per day' ? boat.RentDuration : `${boat.RentDuration} hours`}
@@ -64,143 +99,102 @@ const TopBoatRentals = () => {
 
 export default TopBoatRentals;
 
-
-
-/**import React, { useEffect } from 'react';
+/*
+//working
+import React, { useEffect, useState } from 'react';
 import './Toprent.scss';
 import newRequest from '../../utils/newRequest';
-const boats = [
-    {
-        name: 'Perfect set up for Lake Union cruising.',
-        location: 'Santa Maria, Milazzo',
-        duration: '3 - 8 hours • No Captain',
-        price: '$260 avg/day',
-        rating: 4.5,
-        reviews: 12,
-        imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-      },
-    {
-        name: 'Perfect set up for Lake Union cruising.',
-        location: 'Santa Maria, Milazzo',
-        duration: '3 - 8 hours • No Captain',
-        price: '$260 avg/day',
-        rating: 4.5,
-        reviews: 12,
-        imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-      },
-    {
-        name: 'Perfect set up for Lake Union cruising.',
-        location: 'Santa Maria, Milazzo',
-        duration: '3 - 8 hours • No Captain',
-        price: '$260 avg/day',
-        rating: 4.5,
-        reviews: 12,
-        imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-      },
-    {
-        name: 'Perfect set up for Lake Union cruising.',
-        location: 'Santa Maria, Milazzo',
-        duration: '3 - 8 hours • No Captain',
-        price: '$260 avg/day',
-        rating: 4.5,
-        reviews: 12,
-        imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-      },
-    {
-        name: 'Perfect set up for Lake Union cruising.',
-        location: 'Santa Maria, Milazzo',
-        duration: '3 - 8 hours • No Captain',
-        price: '$260 avg/day',
-        rating: 4.5,
-        reviews: 12,
-        imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-      },
-  {
-    name: 'Perfect set up for Lake Union cruising.',
-    location: 'Santa Maria, Milazzo',
-    duration: '3 - 8 hours • No Captain',
-    price: '$260 avg/day',
-    rating: 4.5,
-    reviews: 12,
-    imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-  },
-  {
-    name: 'Smooth Sailing for Lake Union cruising.',
-    location: 'Kraig Pike',
-    duration: '4 - 7 hours • No Captain',
-    price: '$230 avg/day',
-    rating: 4.5,
-    reviews: 11,
-    imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-  },
-  {
-    name: 'Adventurer\'s Cove Lake Union cruising.',
-    location: 'Sydnee Unions',
-    duration: '3 - 8 hours • Captain',
-    price: '$290 avg/day',
-    rating: 4.5,
-    reviews: 11,
-    imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-  },
-  {
-    name: 'Seaside Serenity Lake Union cruising.',
-    location: 'Ko Chang, Thailand',
-    duration: '2 - 6 hours • Captain',
-    price: '$200 avg/day',
-    rating: 4.5,
-    reviews: 23,
-    imageUrl: 'https://tripfinder-boat.vercel.app/_next/image?url=%2Fimages%2Ftop-boats%2Fboat-twelve.png&w=1920&q=75', // Replace with actual image URL
-  },
-  // Add more boat data as needed
-];
+import { Link } from 'react-router-dom';
 
-const TopBoatRentals = () => {
+const TopBoatRentals = ({ filters }) => {
+  const [boats, setBoats] = useState([]);
+  const [message, setMessage] = useState('');
+  console.log("the filter "+JSON.stringify(filters));
 
+  
   useEffect(() => {
-    const fetchRole = async () => {
+    const fetchBoats = async () => {
       try {
-        const response = await newRequest.get('/yatch/getAll' );
-        alert(JSON.stringify(response.data));
+        // Include filters in the request
+        const response = await newRequest.get('/yatch/getAll')/*,filters? {
+          params: {
+            marina: filters.marina,
+            tripDate: filters.tripDate,
+            boatType: filters.boatType,
+            minPrice: filters.priceRange.min,
+            maxPrice: filters.priceRange.max,
+            numberOfPeople: filters.numberOfPeople,
+            withCrew: filters.withCrew,
+            freeCancellation: filters.freeCancellation,
+            sailboat: filters.categories.sailboat,
+            motorboat: filters.categories.motorboat,
+            catamaran: filters.categories.catamaran,
+            yacht: filters.categories.yacht,
+            jetSki: filters.categories.jetSki,
+            dinghy: filters.categories.dinghy,
+          } }:{}
+        
+        );*/
+/*
+        if (response.data.length === 0) {
+          setBoats([]);
+          setMessage('No boats match your request');
+        } else {
+          console.log(JSON.stringify(response.data));
+          setBoats(response.data);
+          setMessage('');
+        }
       } catch (error) {
-        console.error('Failed to fetch privileges', error);
+        console.error('Failed to fetch boats', error);
 
         // Handle JWT expiration error
         if (error.response && error.response.status === 401) {
           alert('Session expired. Please log in again.');
-
-          //navigate('/login'); // Navigate to login page
+        } else if (error.response && error.response.data.message === 'No yachts found') {
+          setBoats([]);
+          setMessage('No boats match your request');
         } else {
-          alert('Failed to fetch privileges. Please try again.');
+          alert('Failed to fetch boats. Please try again.');
         }
       }
     };
 
-    fetchRole();
-  }, []);
+    fetchBoats();
+  }, [filters]); // Add filters as a dependency
+ 
+
   return (
     <div className="top-boat-rentals">
       <h2>Top Boat Rentals</h2>
       <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      {message && <p className="message">{message}</p>}
+
       <div className="boats-grid">
-        {boats.map((boat, index) => (
-          <div key={index} className="boat-card">
-            <div className="image-container">
-              <img src={boat.imageUrl} alt={boat.name} />
-              <div className="favorite-icon">❤️</div>
-            </div>
-            <div className="boat-info">
-              <h3>{boat.duration}</h3>
-              <p>{boat.name}</p>
-              <p className="location">{boat.location}</p>
-              <p className="price">{boat.price}</p>
-              <div className="rating">
-                {Array.from({ length: Math.floor(boat.rating) }, (_, i) => (
-                  <span key={i}>⭐</span>
-                ))}
-                <span>({boat.reviews})</span>
+        {boats.map((boat) => (
+          <Link to={`/BoatDetail/${boat._id}`} key={boat._id}>
+            <div className="boat-card">
+              <div className="image-container">
+                <img src={boat.Images[0]} alt={boat.vehicleName} />
+                <div className="favorite-icon">❤️</div>
+              </div>
+              <div className="boat-info">
+                <h3>{boat.vehicleType}</h3>
+                <p>{boat.vehicleName}</p>
+                <p className="location">Location: {boat.marinaName}</p>
+                <p className="price">
+                  ${boat.price} /{' '}
+                  {boat.RentDuration === 'per day' ? boat.RentDuration : `${boat.RentDuration} hours`}
+                </p>
+                <div className="rating">
+                  {Array.from({ length: Math.floor(boat.Ratings) }, (_, i) => (
+                    <span key={i}>⭐</span>
+                  ))}
+                  <span>({boat.Raters})</span>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
@@ -209,3 +203,292 @@ const TopBoatRentals = () => {
 
 export default TopBoatRentals;
  */
+ 
+/*
+dynamic approach 
+import React, { useEffect, useState } from 'react';
+import './Toprent.scss';
+import newRequest from '../../utils/newRequest';
+import { Link } from 'react-router-dom';
+
+const TopBoatRentals = ({ filters }) => {
+  const [boats, setBoats] = useState([]);
+
+  useEffect(() => {
+    const fetchBoats = async () => {
+      try {
+        // Include filters in the request
+        const response = await newRequest.get('/yatch/getAll', {
+          params: {
+            marina: filters.marina,
+            tripDate: filters.tripDate,
+            boatType: filters.boatType,
+            minPrice: filters.priceRange.min,
+            maxPrice: filters.priceRange.max,
+            numberOfPeople: filters.numberOfPeople,
+            withCrew: filters.withCrew,
+            freeCancellation: filters.freeCancellation,
+            sailboat: filters.categories.sailboat,
+            motorboat: filters.categories.motorboat,
+            catamaran: filters.categories.catamaran,
+            quiet: filters.categories.quiet,
+            jetSki: filters.categories.jetSki,
+            houseboat: filters.categories.houseboat,
+          },
+        });
+        setBoats(response.data);
+        alert(response);
+        console.log("the issue is "+JSON.stringify(response.data))
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoats();
+  }, [filters]); // Add filters as a dependency
+
+  return (
+    <div className="top-boat-rentals">
+      <h2>Top Boat Rentals</h2>
+      <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      <div className="boats-grid">
+        {boats.map((boat) => (
+          <Link to={/BoatDetail/${boat._id}} key={boat._id}>
+            <div className="boat-card">
+              <div className="image-container">
+                <img src={boat.Images[0]} alt={boat.vehicleName} />
+                <div className="favorite-icon">❤️</div>
+              </div>
+              <div className="boat-info">
+                <h3>{boat.vehicleType}</h3>
+                <p>{boat.vehicleName}</p>
+                <p className="location">Location: {boat.marinaName}</p>
+                <p className="price">
+                  ${boat.price} /{' '}
+                  {boat.RentDuration === 'per day' ? boat.RentDuration : ${boat.RentDuration} hours}
+                </p>
+                <div className="rating">
+                  {Array.from({ length: Math.floor(boat.Ratings) }, (_, i) => (
+                    <span key={i}>⭐</span>
+                  ))}
+                  <span>({boat.Raters})</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TopBoatRentals;
+
+
+
+
+/**
+ working fine :
+ 
+// best solution
+import React, { useEffect, useState } from 'react';
+import './Toprent.scss';
+import newRequest from '../../utils/newRequest';
+import { Link } from 'react-router-dom';
+
+const TopBoatRentals = ({ filters }) => {
+  const [boats, setBoats] = useState([]);
+  const [message, setMessage] = useState('');
+  console.log("the filter "+JSON.stringify(filters));
+
+  
+  useEffect(() => {
+    const fetchBoats = async () => {
+      try {
+        // Include filters in the request
+        const response = await newRequest.get('/yatch/getAll',filters? {
+          params: {
+            marina: filters.marina,
+            tripDate: filters.tripDate,
+            boatType: filters.boatType,
+            minPrice: filters.priceRange.min,
+            maxPrice: filters.priceRange.max,
+            numberOfPeople: filters.numberOfPeople,
+            withCrew: filters.withCrew,
+            freeCancellation: filters.freeCancellation,
+            sailboat: filters.categories.sailboat,
+            motorboat: filters.categories.motorboat,
+            catamaran: filters.categories.catamaran,
+            yacht: filters.categories.yacht,
+            jetSki: filters.categories.jetSki,
+            dinghy: filters.categories.dinghy,
+          } }:{}
+        
+        );
+
+        if (response.data.length === 0) {
+          setBoats([]);
+          setMessage('No boats match your request');
+        } else {
+          console.log(JSON.stringify(response.data));
+          setBoats(response.data);
+          setMessage('');
+        }
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else if (error.response && error.response.data.message === 'No yachts found') {
+          setBoats([]);
+          setMessage('No boats match your request');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoats();
+  }, [filters]); // Add filters as a dependency
+ 
+
+  return (
+    <div className="top-boat-rentals">
+      <h2>Top Boat Rentals</h2>
+      <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      {message && <p className="message">{message}</p>}
+
+      <div className="boats-grid">
+        {boats.map((boat) => (
+          <Link to={`/BoatDetail/${boat._id}`} key={boat._id}>
+            <div className="boat-card">
+              <div className="image-container">
+                <img src={boat.Images[0]} alt={boat.vehicleName} />
+                <div className="favorite-icon">❤️</div>
+              </div>
+              <div className="boat-info">
+                <h3>{boat.vehicleType}</h3>
+                <p>{boat.vehicleName}</p>
+                <p className="location">Location: {boat.marinaName}</p>
+                <p className="price">
+                  ${boat.price} /{' '}
+                  {boat.RentDuration === 'per day' ? boat.RentDuration : `${boat.RentDuration} hours`}
+                </p>
+                <div className="rating">
+                  {Array.from({ length: Math.floor(boat.Ratings) }, (_, i) => (
+                    <span key={i}>⭐</span>
+                  ))}
+                  <span>({boat.Raters})</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TopBoatRentals;
+ 
+ */
+/*
+dynamic approach 
+import React, { useEffect, useState } from 'react';
+import './Toprent.scss';
+import newRequest from '../../utils/newRequest';
+import { Link } from 'react-router-dom';
+
+const TopBoatRentals = ({ filters }) => {
+  const [boats, setBoats] = useState([]);
+
+  useEffect(() => {
+    const fetchBoats = async () => {
+      try {
+        // Include filters in the request
+        const response = await newRequest.get('/yatch/getAll', {
+          params: {
+            marina: filters.marina,
+            tripDate: filters.tripDate,
+            boatType: filters.boatType,
+            minPrice: filters.priceRange.min,
+            maxPrice: filters.priceRange.max,
+            numberOfPeople: filters.numberOfPeople,
+            withCrew: filters.withCrew,
+            freeCancellation: filters.freeCancellation,
+            sailboat: filters.categories.sailboat,
+            motorboat: filters.categories.motorboat,
+            catamaran: filters.categories.catamaran,
+            quiet: filters.categories.quiet,
+            jetSki: filters.categories.jetSki,
+            houseboat: filters.categories.houseboat,
+          },
+        });
+        setBoats(response.data);
+        alert(response);
+        console.log("the issue is "+JSON.stringify(response.data))
+      } catch (error) {
+        console.error('Failed to fetch boats', error);
+
+        // Handle JWT expiration error
+        if (error.response && error.response.status === 401) {
+          alert('Session expired. Please log in again.');
+        } else {
+          alert('Failed to fetch boats. Please try again.');
+        }
+      }
+    };
+
+    fetchBoats();
+  }, [filters]); // Add filters as a dependency
+
+  return (
+    <div className="top-boat-rentals">
+      <h2>Top Boat Rentals</h2>
+      <p>Unsatiable It Considered Invitation He Traveling Insensible.</p>
+
+      <div className="boats-grid">
+        {boats.map((boat) => (
+          <Link to={/BoatDetail/${boat._id}} key={boat._id}>
+            <div className="boat-card">
+              <div className="image-container">
+                <img src={boat.Images[0]} alt={boat.vehicleName} />
+                <div className="favorite-icon">❤️</div>
+              </div>
+              <div className="boat-info">
+                <h3>{boat.vehicleType}</h3>
+                <p>{boat.vehicleName}</p>
+                <p className="location">Location: {boat.marinaName}</p>
+                <p className="price">
+                  ${boat.price} /{' '}
+                  {boat.RentDuration === 'per day' ? boat.RentDuration : ${boat.RentDuration} hours}
+                </p>
+                <div className="rating">
+                  {Array.from({ length: Math.floor(boat.Ratings) }, (_, i) => (
+                    <span key={i}>⭐</span>
+                  ))}
+                  <span>({boat.Raters})</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TopBoatRentals;
+
+
+*/

@@ -100,11 +100,346 @@ export const GetAYacht = async (req, res, next) => {
   }
 };
 
+
+//
+export const GetFullYatchs = async (req, res, next) => {
+  try {
+    console.log("Fetching yachts with marina names");
+
+    const {
+      marina,
+      tripDate,
+      vehicleType,
+      minPrice,
+      maxPrice,
+      numberOfPeople,
+      withCrew,
+      freeCancellation,
+      sailboat,
+      motorboat,
+      catamaran,
+      yacht,
+      jetSki,
+      dinghy
+    } = req.query;
+
+    console.log("the marina selected " + marina);
+
+    // Build the match stage based on the filters
+    const matchStage = {};
+
+    if (marina) {
+      matchStage['marinaName'] = marina;
+    }
+    if (vehicleType) {
+      matchStage.vehicleType = vehicleType;
+    }
+    if (minPrice) {
+      matchStage.price = { ...matchStage.price, $gte: parseFloat(minPrice) };
+    }
+    if (maxPrice) {
+      matchStage.price = { ...matchStage.price, $lte: parseFloat(maxPrice) };
+    }
+    if (numberOfPeople) {
+      matchStage.Guests = { $gte: parseInt(numberOfPeople) };
+    }
+    if (withCrew === 'true') {
+      matchStage.withCrew = true;
+    }
+    if (freeCancellation === 'true') {
+      matchStage.freeCancellation = true;
+    }
+
+    // Build an array of vehicle types based on the selected categories
+    const vehicleTypes = [];
+    if (sailboat === 'true') vehicleTypes.push('Sailboat');
+    if (motorboat === 'true') vehicleTypes.push('Motor Boat');
+    if (catamaran === 'true') vehicleTypes.push('Catamaran');
+    if (yacht === 'true') vehicleTypes.push('Yacht');
+    if (jetSki === 'true') vehicleTypes.push('JetSki');
+    if (dinghy === 'true') vehicleTypes.push('Dinghy');
+
+    if (vehicleTypes.length > 0) {
+      matchStage.vehicleType = { $in: vehicleTypes };
+      console.log("entered the chat \n");
+      console.log(sailboat+" sail  \n");
+      console.log(motorboat+" moto\n");
+      console.log(catamaran+" cater \n");
+      console.log(yacht+"  yacht \n");
+      console.log(jetSki+" jetski  \n");
+      console.log(dinghy+"  dng  \n");
+    }
+
+    console.log("Testing the filter " + vehicleType);
+
+    const yachts = await Yacht.aggregate([
+      {
+        $addFields: {
+          MarinaID: { $toObjectId: "$MarinaID" } // Cast MarinaID to ObjectId
+        }
+      },
+      {
+        $lookup: {
+          from: 'marinas', // The name of the Marina collection
+          localField: 'MarinaID', // Field from the Yacht collection
+          foreignField: '_id', // Field from the Marina collection
+          as: 'marina' // The name of the array field to be added to each output document
+        }
+      },
+      {
+        $unwind: '$marina' // Deconstruct the array field to get the object
+      },
+      {
+        $addFields: {
+          marinaName: '$marina.marinaName' // Add the marinaName field
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          sellerID: 1,
+          vehicleName: 1,
+          vehicleType: 1,
+          price: 1,
+          description: 1,
+          bedrooms: 1,
+          bathrooms: 1,
+          Guests: 1,
+          Images: 1,
+          Engine: 1,
+          Torque: 1,
+          FuelSystem: 1,
+          boreStroke: 1,
+          Capacity: 1,
+          Weight: 1,
+          FuelCap: 1,
+          Equipment: 1,
+          Ratings: 1,
+          Raters: 1,
+          MarinaID: 1,
+          RentDuration: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          marinaName: 1, // Ensure marinaName is included
+          categories: 1 // Ensure categories are included
+        }
+      },
+      {
+        $match: matchStage // Apply the match stage after the lookup and projection stages
+      }
+    ]);
+
+   // console.log("The data of marina after filter :" + JSON.stringify(yachts));
+    if (!yachts || yachts.length === 0) {
+      return res.status(404).json({ message: "No yachts found" });
+    }
+
+    res.status(200).json(yachts);
+  } catch (err) {
+    console.error(err);
+    next(createError(500, "Internal server issue"));
+  }
+};
+
+///
+//
+
+/*
+this is the best way to solve it : 
+export const GetFullYatchs = async (req, res, next) => {
+  try {
+    console.log("Fetching yachts with marina names");
+
+    const {
+      marina,
+  
+      vehicleType,
+      minPrice,
+      maxPrice,
+      numberOfPeople,
+      withCrew,
+      freeCancellation,
+      sailboat,
+      motorboat,
+      catamaran,
+      quiet,
+      jetSki,
+      houseboat
+    } = req.query;
+
+    console.log("the marina selected "+marina);
+    // Build the match stage based on the filters
+    const matchStage = {};
+
+    if (marina) {
+      matchStage['marinaName'] = marina;
+    }
+    if (vehicleType) {
+      matchStage.vehicleType = vehicleType;
+    }
+    if (minPrice) {
+      matchStage.price = { ...matchStage.price, $gte: parseFloat(minPrice) };
+    }
+    if (maxPrice) {
+      matchStage.price = { ...matchStage.price, $lte: parseFloat(maxPrice) };
+    }
+    if (numberOfPeople) {
+      matchStage.Guests = { $gte: parseInt(numberOfPeople) };
+    }
+   
+ 
+
+    const yachts = await Yacht.aggregate([
+      {
+        $addFields: {
+          MarinaID: { $toObjectId: "$MarinaID" } // Cast MarinaID to ObjectId
+        }
+      },
+      {
+        $lookup: {
+          from: 'marinas', // The name of the Marina collection
+          localField: 'MarinaID', // Field from the Yacht collection
+          foreignField: '_id', // Field from the Marina collection
+          as: 'marina' // The name of the array field to be added to each output document
+        }
+      },
+      {
+        $unwind: '$marina' // Deconstruct the array field to get the object
+      },
+      {
+        $addFields: {
+          marinaName: '$marina.marinaName' // Add the marinaName field
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          sellerID: 1,
+          vehicleName: 1,
+          vehicleType: 1,
+          price: 1,
+          description: 1,
+          bedrooms: 1,
+          bathrooms: 1,
+          Guests: 1,
+          Images: 1,
+          Engine: 1,
+          Torque: 1,
+          FuelSystem: 1,
+          boreStroke: 1,
+          Capacity: 1,
+          Weight: 1,
+          FuelCap: 1,
+          Equipment: 1,
+          Ratings: 1,
+          Raters: 1,
+          MarinaID: 1,
+          RentDuration: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          marinaName: 1, // Ensure marinaName is included
+          categories: 1 // Ensure categories are included
+        }
+      },
+      {
+        $match: matchStage // Apply the match stage after the lookup and projection stages
+      }
+    ]);
+
+    console.log("the data of marina after filter :"+JSON.stringify(yachts));
+    if (!yachts || yachts.length === 0) {
+      return res.status(404).json({ message: "No yachts found" });
+    }
+
+    res.status(200).json(yachts);
+  } catch (err) {
+    console.error(err);
+    next(createError(500, "Internal server issue"));
+  }
+};
+*/
+
+
+// new update under testing  with no filter actions 
+/*export const GetFullYatchs = async (req, res, next) => {
+  try {
+    console.log("Fetching yachts with marina names");
+
+    const yachts = await Yacht.aggregate([
+      {
+        $addFields: {
+          MarinaID: { $toObjectId: "$MarinaID" } // Cast MarinaID to ObjectId
+        }
+      },
+      {
+        $lookup: {
+          from: 'marinas', // The name of the Marina collection
+          localField: 'MarinaID', // Field from the Yacht collection
+          foreignField: '_id', // Field from the Marina collection
+          as: 'marina' // The name of the array field to be added to each output document
+        }
+      },
+      {
+        $unwind: '$marina' // Deconstruct the array field to get the object
+      },
+      {
+        $addFields: {
+          marinaName: '$marina.marinaName' // Add the marinaName field
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          sellerID: 1,
+          vehicleName: 1,
+          vehicleType: 1,
+          price: 1,
+          description: 1,
+          bedrooms: 1,
+          bathrooms: 1,
+          Guests: 1,
+          Images: 1,
+          Engine: 1,
+          Torque: 1,
+          FuelSystem: 1,
+          boreStroke: 1,
+          Capacity: 1,
+          Weight: 1,
+          FuelCap: 1,
+          Equipment: 1,
+          Ratings: 1,
+          Raters: 1,
+          MarinaID: 1,
+          RentDuration: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          marinaName: 1 // Ensure marinaName is included
+        }
+      }
+    ]);
+//// make the filterr check here after all the data is check 
+    if (!yachts) {
+      return res.status(404).json({ message: "Error fetching yachts" });
+    }
+
+    res.status(200).json(yachts);
+  } catch (err) {
+    console.error(err);
+    next(createError(500, "Internal server issue"));
+  }
+};
+*/
+
+/*
+// best solution 
 export const GetFullYatchs = async(req,res,next)=>{
   try {
    
 
- 
+     console.log(" test \n");
     const yacht = await Yacht.find();
 
     if (!yacht) {
@@ -119,7 +454,7 @@ export const GetFullYatchs = async(req,res,next)=>{
 
 }
 
-
+*/
 export const AddReview = async (req, res, next) => {
   const { userId, yachtId, rating, feedback } = req.body;
 
